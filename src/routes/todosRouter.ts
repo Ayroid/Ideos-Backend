@@ -6,9 +6,9 @@ import {
   createTodo,
   updateTodo,
   deleteTodo,
-} from "../controllers/todosController.js";
+} from "../controllers/todosController";
 
-const todosRouter = Router();
+const todosRouter: Router = Router();
 
 todosRouter.route("/").get(getTodos).post(createTodo);
 todosRouter.route("/:id").get(getTodoById).put(updateTodo).delete(deleteTodo);

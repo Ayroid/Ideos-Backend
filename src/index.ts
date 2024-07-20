@@ -1,14 +1,14 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { Database } from "./controllers/connectDatabase.js";
+import { Database } from "./controllers/connectDatabase";
 
 dotenv.config();
 
-const PORT = process.env.PORT || 5000;
-const MONGODB_URI = process.env.MONGODB_URI;
+const PORT = process.env.PORT ?? 5000;
+const MONGODB_URI = process.env.MONGODB_URI!;
 
-import todoRouter from "./routers/todosRouter.js";
+import todoRouter from "./routes/todosRouter";
 
 const app = express();
 
