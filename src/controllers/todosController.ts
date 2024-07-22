@@ -1,20 +1,25 @@
-import todosModel from "../models/todosModel.js";
+import { Request, Response } from "express";
+import todosModel, { ITodo } from "../models/todosModel"; // Assuming todosModel exports Todo interface
+
 import dotenv from "dotenv";
 dotenv.config();
 
-const getTodoById = async (req, res) => {
+const getTodoById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
-    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).send("Invalid Todo ID.");
+    if (!RegExp(/^[0-9a-fA-F]{24}$/).exec(id)) {
+      res.status(400).send("Invalid Todo ID.");
+      return;
     }
 
     const todo = await todosModel.findById(id);
 
     if (!todo) {
-      return res.status(404).send("Todo not found.");
+      res.status(404).send("Todo not found.");
+      return;
     }
+
     res.status(200).send(todo);
   } catch (err) {
     console.error("Error getting todo:", err);
@@ -22,17 +27,18 @@ const getTodoById = async (req, res) => {
   }
 };
 
-const getTodos = async (req, res) => {
+const getTodos = async (req: Request, res: Response): Promise<void> => {
   try {
     const { status, sort } = req.query;
-    const query = status ? { status } : {};
+    const query: any = status ? { status } : {}; // Adjust type as per your schema
 
     const todos = await todosModel.find(query).sort({
       ratings: sort === "asc" ? 1 : -1,
     });
 
-    if (!todos) {
-      return res.status(404).send("Todos not found.");
+    if (!todos || todos.length === 0) {
+      res.status(404).send("Todos not found.");
+      return;
     }
 
     res.status(200).send(todos);
@@ -42,15 +48,16 @@ const getTodos = async (req, res) => {
   }
 };
 
-const createTodo = async (req, res) => {
+const createTodo = async (req: Request, res: Response): Promise<void> => {
   try {
     const { title, description, status, tags, dueDate } = req.body;
 
     if (!title || !description || !status || !tags || !dueDate) {
-      return res.status(400).send("All fields are required.");
+      res.status(400).send("All fields are required.");
+      return;
     }
 
-    const todoData = {
+    const todoData: ITodo = {
       title,
       description,
       status,
@@ -63,7 +70,8 @@ const createTodo = async (req, res) => {
     const todoCreated = await newTodo.save();
 
     if (!todoCreated) {
-      return res.status(500).send("Failed to create todo.");
+      res.status(500).send("Failed to create todo.");
+      return;
     }
 
     res.status(201).send("Todo created successfully.");
@@ -73,21 +81,21 @@ const createTodo = async (req, res) => {
   }
 };
 
-const updateTodo = async (req, res) => {
+const updateTodo = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { title, description, status, tags, dueDate } = req.body;
 
-    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).send("Invalid todo ID.");
+    if (!RegExp(/^[0-9a-fA-F]{24}$/).exec(id)) {
+      res.status(400).send("Invalid todo ID.");
+      return;
     }
 
     const todo = await todosModel.findById(id);
 
-    console.log(todo);
-
     if (!todo) {
-      return res.status(404).send("Todo not found.");
+      res.status(404).send("Todo not found.");
+      return;
     }
 
     todo.title = title || todo.title;
@@ -99,7 +107,8 @@ const updateTodo = async (req, res) => {
     const todoUpdated = await todo.save();
 
     if (!todoUpdated) {
-      return res.status(500).send("Failed to update todo.");
+      res.status(500).send("Failed to update todo.");
+      return;
     }
 
     res.status(200).send("Todo updated successfully.");
@@ -109,18 +118,20 @@ const updateTodo = async (req, res) => {
   }
 };
 
-const deleteTodo = async (req, res) => {
+const deleteTodo = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
-    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).send("Invalid todo ID.");
+    if (!RegExp(/^[0-9a-fA-F]{24}$/).exec(id)) {
+      res.status(400).send("Invalid todo ID.");
+      return;
     }
 
     const todo = await todosModel.findByIdAndDelete(id);
 
     if (!todo) {
-      return res.status(404).send("Todo not found.");
+      res.status(404).send("Todo not found.");
+      return;
     }
 
     res.status(200).send("Todo deleted successfully.");

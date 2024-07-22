@@ -1,8 +1,12 @@
-import mongoose from "mongoose";
+import mongoose, { ConnectOptions } from "mongoose";
+
 class Database {
-  constructor(uri, options) {
+  private uri: string;
+  private options: ConnectOptions;
+
+  constructor(uri: string, options?: ConnectOptions) {
     this.uri = uri;
-    this.options = options;
+    this.options = options || {};
   }
 
   async connect() {
