@@ -1,16 +1,36 @@
-import express from "express";
+// src/index.ts
 import cors from "cors";
 import dotenv from "dotenv";
+import express from "express";
+import { AuthenticatedRequest } from "../types/custom";
 import { Database } from "./controllers/connectDatabase";
+import todoRouter from "./routes/todosRouter";
+const {
+  setupKinde,
+  protectRoute,
+  getUser,
+} = require("@kinde-oss/kinde-node-express");
 
 dotenv.config();
 
 const PORT = process.env.PORT ?? 5000;
 const MONGODB_URI = process.env.MONGODB_URI!;
 
-import todoRouter from "./routes/todosRouter";
-
 const app = express();
+
+const kindeConfig = {
+  clientId: process.env.CLIENT_ID,
+  issuerBaseUrl: process.env.ISSUER_BASE_URL,
+  siteUrl: process.env.SITE_URL,
+  secret: process.env.SECRET,
+  redirectUrl: process.env.REDIRECT_URL,
+  scope: process.env.SCOPE,
+  grantType: process.env.GRANT_TYPE,
+  unAuthorisedUrl: process.env.UNAUTHORISED_URL,
+  postLogoutRedirectUrl: process.env.POST_LOGOUT_REDIRECT_URL,
+};
+
+setupKinde(kindeConfig, app);
 
 const database = new Database(MONGODB_URI);
 database.connect();
@@ -23,6 +43,16 @@ app.use("/api/images", express.static("public/images"));
 app.get("/api/test", (req, res) => {
   res.send("Application is running.");
 });
+
+app.get(
+  "/api/protected",
+  protectRoute,
+  getUser,
+  async (req: AuthenticatedRequest, res) => {
+    const userInfo = req.user;
+    res.json({ message: "Protected Routes", user: userInfo });
+  }
+);
 
 app.use("/api/todos", todoRouter);
 
