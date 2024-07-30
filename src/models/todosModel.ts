@@ -1,24 +1,26 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, model, Document } from "mongoose";
 
-enum TodoStatus {
-  TODO = "todo",
-  IN_PROGRESS = "inprogress",
-  COMPLETED = "completed",
-  OVERDUE = "overdue",
-}
-
-const TodoStatusValues = Object.values(TodoStatus) as string[];
-
-export interface ITodo {
+export interface ITodo extends Document {
+  userId: mongoose.Types.ObjectId;
+  columnId: mongoose.Types.ObjectId;
   title: string;
   description: string;
-  status: string;
-  tags: string[];
+  tags: { title: string; color: string }[];
   dueDate: Date;
 }
 
-const todosSchema: Schema<ITodo> = new mongoose.Schema(
+const todosSchema: Schema<ITodo> = new Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "users",
+      required: true,
+    },
+    columnId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "todocolumns",
+      required: true,
+    },
     title: {
       type: String,
       required: true,
@@ -27,18 +29,17 @@ const todosSchema: Schema<ITodo> = new mongoose.Schema(
       type: String,
       required: true,
     },
-    status: {
-      type: String,
-      enum: TodoStatusValues,
-      required: true,
-      default: TodoStatus.TODO,
-    },
-    tags: {
-      type: [String],
-      required: true,
-    },
     dueDate: {
       type: Date,
+      required: true,
+    },
+    tags: {
+      type: [
+        {
+          title: { type: String, required: true },
+          color: { type: String, required: true },
+        },
+      ],
       required: true,
     },
   },
@@ -47,6 +48,4 @@ const todosSchema: Schema<ITodo> = new mongoose.Schema(
   }
 );
 
-const todosModel = mongoose.model<ITodo>("todos", todosSchema);
-
-export default todosModel;
+export const todosModel = model<ITodo>("todos", todosSchema);
