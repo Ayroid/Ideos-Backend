@@ -2,14 +2,17 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
-import { AuthenticatedRequest } from "../types/custom";
+import { AuthenticatedRequest } from "../types";
 import { Database } from "./controllers/connectDatabase";
-import todoRouter from "./routes/todosRouter";
 const {
   setupKinde,
   protectRoute,
   getUser,
 } = require("@kinde-oss/kinde-node-express");
+
+import todosRouter from "./routes/todosRouter";
+import usersRouter from "./routes/usersRouter";
+import todoColumnsRouter from "./routes/todoColumnsRouter";
 
 dotenv.config();
 
@@ -54,7 +57,9 @@ app.get(
   }
 );
 
-app.use("/api/todos", todoRouter);
+app.use("/api/users", protectRoute, getUser, usersRouter);
+app.use("/api/todoColumns", protectRoute, getUser, todoColumnsRouter);
+app.use("/api/todos", todosRouter);
 
 process.on("SIGINT", () => {
   database

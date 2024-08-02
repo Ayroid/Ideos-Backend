@@ -1,14 +1,16 @@
-import { Request, Response } from "express";
-import todosModel, { ITodo } from "../models/todosModel"; // Assuming todosModel exports Todo interface
-
 import dotenv from "dotenv";
+import { Request, Response } from "express";
+import { todosModel } from "../models/todosModel"; // Assuming todosModel exports Todo interface
+
 dotenv.config();
+
+const isValidObjectId = (id: string): boolean => /^[0-9a-fA-F]{24}$/.test(id);
 
 const getTodoById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
-    if (!RegExp(/^[0-9a-fA-F]{24}$/).exec(id)) {
+    if (!isValidObjectId(id)) {
       res.status(400).send("Invalid Todo ID.");
       return;
     }
@@ -50,24 +52,23 @@ const getTodos = async (req: Request, res: Response): Promise<void> => {
 
 const createTodo = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { title, description, status, tags, dueDate } = req.body;
+    const { userId, columnId, title, description, tags, dueDate } = req.body;
 
-    if (!title || !description || !status || !tags || !dueDate) {
+    if (!userId || !columnId || !title || !description || !tags || !dueDate) {
       res.status(400).send("All fields are required.");
       return;
     }
 
-    const todoData: ITodo = {
+    const todoData = new todosModel({
+      userId,
+      columnId,
       title,
       description,
-      status,
       tags,
-      dueDate,
-    };
+      dueDate: new Date(dueDate),
+    });
 
-    const newTodo = new todosModel(todoData);
-
-    const todoCreated = await newTodo.save();
+    const todoCreated = await todoData.save();
 
     if (!todoCreated) {
       res.status(500).send("Failed to create todo.");
@@ -84,9 +85,9 @@ const createTodo = async (req: Request, res: Response): Promise<void> => {
 const updateTodo = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { title, description, status, tags, dueDate } = req.body;
+    const { userId, columnId, title, description, tags, dueDate } = req.body;
 
-    if (!RegExp(/^[0-9a-fA-F]{24}$/).exec(id)) {
+    if (!isValidObjectId(id)) {
       res.status(400).send("Invalid todo ID.");
       return;
     }
@@ -98,11 +99,12 @@ const updateTodo = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    todo.userId = userId || todo.userId;
+    todo.columnId = columnId || todo.columnId;
     todo.title = title || todo.title;
     todo.description = description || todo.description;
-    todo.status = status || todo.status;
     todo.tags = tags || todo.tags;
-    todo.dueDate = dueDate || todo.dueDate;
+    todo.dueDate = dueDate ? new Date(dueDate) : todo.dueDate;
 
     const todoUpdated = await todo.save();
 
@@ -122,7 +124,7 @@ const deleteTodo = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
-    if (!RegExp(/^[0-9a-fA-F]{24}$/).exec(id)) {
+    if (!isValidObjectId(id)) {
       res.status(400).send("Invalid todo ID.");
       return;
     }
@@ -141,4 +143,4 @@ const deleteTodo = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export { getTodoById, getTodos, createTodo, updateTodo, deleteTodo };
+export { createTodo, deleteTodo, getTodoById, getTodos, updateTodo };

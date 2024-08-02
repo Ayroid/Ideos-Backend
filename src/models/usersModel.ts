@@ -1,33 +1,35 @@
 import mongoose, { Document, Schema } from "mongoose";
 
 export interface IUser extends Document {
+  authId: string;
   email: string;
-  name?: string;
+  fullname?: string;
   picture?: string;
-  givenName?: string;
-  familyName?: string;
+  firstName?: string;
+  lastName?: string;
   emailVerified: boolean;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 const UserSchema: Schema<IUser> = new Schema(
   {
+    authId: {
+      type: String,
+      required: true,
+    },
     email: {
       type: String,
       required: true,
-      unique: true,
     },
-    name: {
+    fullname: {
       type: String,
     },
     picture: {
       type: String,
     },
-    givenName: {
+    firstName: {
       type: String,
     },
-    familyName: {
+    lastName: {
       type: String,
     },
     emailVerified: {
@@ -38,4 +40,4 @@ const UserSchema: Schema<IUser> = new Schema(
   { timestamps: true }
 );
 
-export const User = mongoose.model<IUser>("users", UserSchema);
+export const usersModel = mongoose.model<IUser>("users", UserSchema);

@@ -28,6 +28,7 @@ const todoColumnSchema: Schema<ITodoColumn> = new Schema(
   }
 );
 
-const todoColumnModel = model<ITodoColumn>("todocolumns", todoColumnSchema);
-
-export default todoColumnModel;
+export const todoColumnModel = model<ITodoColumn>(
+  "todocolumns",
+  todoColumnSchema
+);
