@@ -1,36 +1,10 @@
 import dotenv from "dotenv";
-import { Request, Response } from "express";
-import { todosModel } from "../models/todosModel";
-import { todoColumnModel } from "../models/todosColumnModel";
+import { Response } from "express";
 import { AuthenticatedRequest } from "../../types";
+import { todoColumnModel } from "../models/todosColumnModel";
 import { usersModel } from "../models/usersModel";
 
 dotenv.config();
-
-const isValidObjectId = (id: string): boolean => /^[0-9a-fA-F]{24}$/.test(id);
-
-const getTodoById = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { id } = req.params;
-
-    if (!isValidObjectId(id)) {
-      res.status(400).send("Invalid Todo ID.");
-      return;
-    }
-
-    const todo = await todosModel.findById(id);
-
-    if (!todo) {
-      res.status(404).send("Todo not found.");
-      return;
-    }
-
-    res.status(200).send(todo);
-  } catch (err) {
-    console.error("Error getting todo:", err);
-    res.status(500).send("Failed to get todo. Please try again later.");
-  }
-};
 
 const getTodoColumns = async (
   req: AuthenticatedRequest,
@@ -38,20 +12,20 @@ const getTodoColumns = async (
 ): Promise<void> => {
   try {
     const userInfo = req.user;
+
     if (!userInfo) {
-      res.status(400).send("User information missing in request.");
+      res.status(400).send("Unauthorized Access");
       return;
     }
 
     const user = await usersModel.findOne({ authId: userInfo.id });
+
     if (!user) {
-      res.status(409).send("User not found");
+      res.status(409).send("Unauthorized Access");
       return;
     }
 
-    const userId = user._id + "";
-
-    const result = await todoColumnModel.find({ userId });
+    const result = await todoColumnModel.find({ userId: user._id });
 
     if (!result) {
       res.status(404).send([]);
@@ -71,13 +45,25 @@ const createTodoColumns = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { title } = req.body;
+    const { title, uniqueId } = req.body;
+
     const userInfo = req.user;
 
-    const user = await usersModel.findOne({ authId: userInfo!.id });
+    if (!userInfo) {
+      res.status(400).send("Unauthorized Access");
+      return;
+    }
+
+    const user = await usersModel.findOne({ authId: userInfo.id });
+
+    if (!user) {
+      res.status(409).send("Unauthorized Access");
+      return;
+    }
 
     const data = new todoColumnModel({
       title,
+      uniqueId,
       userId: user?._id,
     });
 
@@ -105,14 +91,12 @@ const updateTodosColumn = async (
     const { id } = req.params;
     const { title } = req.body;
 
-    if (!isValidObjectId(id)) {
-      res.status(400).send("Invalid ID.");
-      return;
-    }
-
-    const updated = await todoColumnModel.findByIdAndUpdate(id, {
-      title,
-    });
+    const updated = await todoColumnModel.findOneAndUpdate(
+      { uniqueId: id },
+      {
+        title,
+      }
+    );
 
     if (!updated) {
       res.status(404).send("TodoColumns not updated.");
@@ -134,12 +118,7 @@ const deleteTodosColumn = async (
   try {
     const { id } = req.params;
 
-    if (!isValidObjectId(id)) {
-      res.status(400).send("Invalid todo ID.");
-      return;
-    }
-
-    const todo = await todoColumnModel.findByIdAndDelete(id);
+    const todo = await todoColumnModel.findOneAndDelete({ uniqueId: id });
 
     if (!todo) {
       res.status(404).send("TodoColumns not found.");
@@ -156,9 +135,8 @@ const deleteTodosColumn = async (
 };
 
 export {
-  getTodoColumns,
-  // getTodosColumnById,
   createTodoColumns,
-  updateTodosColumn,
   deleteTodosColumn,
+  getTodoColumns,
+  updateTodosColumn,
 };
