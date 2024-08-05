@@ -6,4 +6,4 @@ const usersRouter: Router = Router();
 
 usersRouter.route("/").post(createUser);
 
-export default usersRouter;
+export { usersRouter };

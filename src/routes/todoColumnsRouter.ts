@@ -2,19 +2,14 @@ import { Router } from "express";
 
 import {
   getTodoColumns,
-  // getTodosColumnById,
   createTodoColumns,
   updateTodosColumn,
   deleteTodosColumn,
 } from "../controllers/todoColumnsController";
 
-const todosColumnRouter: Router = Router();
+const todoColumnsRouter: Router = Router();
 
-todosColumnRouter.route("/").get(getTodoColumns).post(createTodoColumns);
-todosColumnRouter
-  .route("/:id")
-//   .get(getTodosColumnById)
-  .put(updateTodosColumn)
-  .delete(deleteTodosColumn);
+todoColumnsRouter.route("/").get(getTodoColumns).post(createTodoColumns);
+todoColumnsRouter.route("/:id").put(updateTodosColumn).delete(deleteTodosColumn);
 
-export default todosColumnRouter;
+export { todoColumnsRouter };

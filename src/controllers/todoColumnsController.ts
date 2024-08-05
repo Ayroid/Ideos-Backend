@@ -1,8 +1,7 @@
 import dotenv from "dotenv";
 import { Response } from "express";
 import { AuthenticatedRequest } from "../../types";
-import { todoColumnModel } from "../models/todosColumnModel";
-import { usersModel } from "../models/usersModel";
+import { todoColumnModel, usersModel } from "../models";
 
 dotenv.config();
 
@@ -25,7 +24,9 @@ const getTodoColumns = async (
       return;
     }
 
-    const result = await todoColumnModel.find({ userId: user._id });
+    const result = await todoColumnModel
+      .find({ userId: user._id })
+      .populate("todoIds");
 
     if (!result) {
       res.status(404).send([]);
@@ -47,6 +48,11 @@ const createTodoColumns = async (
   try {
     const { title, uniqueId } = req.body;
 
+    if (!title || !uniqueId) {
+      res.status(400).send("All fields are required.");
+      return;
+    }
+
     const userInfo = req.user;
 
     if (!userInfo) {
@@ -62,9 +68,9 @@ const createTodoColumns = async (
     }
 
     const data = new todoColumnModel({
+      userId: user?._id,
       title,
       uniqueId,
-      userId: user?._id,
     });
 
     const created = await data.save();

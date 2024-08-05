@@ -13,4 +13,4 @@ const todosRouter: Router = Router();
 todosRouter.route("/").get(getTodos).post(createTodo);
 todosRouter.route("/:id").get(getTodoById).put(updateTodo).delete(deleteTodo);
 
-export default todosRouter;
+export { todosRouter };

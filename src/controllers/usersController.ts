@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { usersModel } from "../models/usersModel"; // Assuming usersModel exports User interface
+import { usersModel } from "../models";
 import dotenv from "dotenv";
 import { AuthenticatedRequest } from "../../types";
 dotenv.config();

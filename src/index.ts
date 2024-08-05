@@ -10,9 +10,7 @@ const {
   getUser,
 } = require("@kinde-oss/kinde-node-express");
 
-import todosRouter from "./routes/todosRouter";
-import usersRouter from "./routes/usersRouter";
-import todoColumnsRouter from "./routes/todoColumnsRouter";
+import { todosRouter, usersRouter, todoColumnsRouter } from "./routes";
 
 dotenv.config();
 
@@ -59,7 +57,7 @@ app.get(
 
 app.use("/api/users", protectRoute, getUser, usersRouter);
 app.use("/api/todoColumns", protectRoute, getUser, todoColumnsRouter);
-app.use("/api/todos", todosRouter);
+app.use("/api/todos", protectRoute, getUser, todosRouter);
 
 process.on("SIGINT", () => {
   database

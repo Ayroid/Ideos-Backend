@@ -2,7 +2,8 @@ import mongoose, { Schema, model, Document } from "mongoose";
 
 export interface ITodo extends Document {
   userId: mongoose.Types.ObjectId;
-  columnId: mongoose.Types.ObjectId;
+  uniqueId: string;
+  columnId: string;
   title: string;
   description: string;
   tags: { title: string; color: string }[];
@@ -16,9 +17,12 @@ const todosSchema: Schema<ITodo> = new Schema(
       ref: "users",
       required: true,
     },
+    uniqueId: {
+      type: String,
+      required: true,
+    },
     columnId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "todocolumns",
+      type: String,
       required: true,
     },
     title: {
