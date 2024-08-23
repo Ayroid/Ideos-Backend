@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import pkg from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express"; // Assuming you're using Express
 import { StatusCodes } from "http-status-codes";
-import logger from "logger";
+import logger from "../logger";
 
 dotenv.config();
 
@@ -64,6 +64,7 @@ const verifyToken = (
   try {
     const decoded = decode(token);
     req.user = decoded;
+    logger.info("Token Verified");
     next();
   } catch (error) {
     logger.error("Invalid token", error);
@@ -114,6 +115,7 @@ const refreshAccessToken = async (
     };
     const accessToken = generateAccessToken(payload);
     const refreshToken = generateRefreshToken(payload);
+    logger.info("Token Refreshed");
     res.status(StatusCodes.OK).json({ accessToken, refreshToken });
   } catch (error) {
     logger.error("Invalid token", error);

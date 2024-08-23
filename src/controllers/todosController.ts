@@ -74,7 +74,8 @@ const createTodo = async (
     const { uniqueId, columnId, title, description, tags, dueDate } = req.body;
 
     if (!uniqueId || !columnId || !title || !description || !tags || !dueDate) {
-      res.status(400).send("All fields are required.");
+      logger.info("Error Creating Todo: All fields are required.");
+      res.status(400).send("Error Creating Todo: All fields are required.");
       return;
     }
 
@@ -115,6 +116,8 @@ const createTodo = async (
     const todoColumn = await todoColumnModel.findOne({ uniqueId: columnId });
 
     if (!todoColumn) {
+      await todosModel.findByIdAndDelete(todoCreated._id);
+      logger.error("Todo column not found.");
       res.status(404).send("Todo column not found.");
       return;
     }
@@ -131,7 +134,7 @@ const createTodo = async (
       if (todoIndex > -1) {
         todoColumn.todoIds!.splice(todoIndex, 1);
       }
-
+      logger.error("Failed to update todo column.");
       res.status(500).send("Failed to update todo column.");
       return;
     }
@@ -210,7 +213,7 @@ const deleteTodo = async (
         if (!todoColumnSaved) {
           logger.error("Failed to update todo column.");
           res.status(500).send("Failed to update todo column.");
-          return;
+          return
         }
       }
     }

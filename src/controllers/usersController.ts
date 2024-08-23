@@ -2,7 +2,7 @@ import { Response } from "express";
 import { usersModel } from "../models";
 import dotenv from "dotenv";
 import { AuthenticatedRequest } from "../../types";
-import logger from "logger";
+import logger from "../logger";
 dotenv.config();
 
 const createUser = async (
@@ -28,14 +28,12 @@ const createUser = async (
       emailVerified: userInfo.email_verified,
     };
 
-    // Check if user already exists
     const existingUser = await usersModel.findOne({ authId: userInfo.id });
     if (existingUser) {
       logger.info("User already exists");
       res.status(200).send("User already exists");
       return;
     } else {
-      // Create new user
       const newUser = new usersModel(userData);
       const userCreated = await newUser.save();
 
