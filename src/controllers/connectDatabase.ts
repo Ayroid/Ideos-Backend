@@ -1,5 +1,5 @@
 import mongoose, { ConnectOptions } from "mongoose";
-
+import {developmentLogger} from "../logger";
 class Database {
   private uri: string;
   private options: ConnectOptions;
@@ -13,6 +13,8 @@ class Database {
     try {
       await mongoose.connect(this.uri, this.options);
       console.log("Database connected");
+      // @ts-ignore
+      developmentLogger.info("database connected");
     } catch (error) {
       console.log("Database Connection Error", error);
     }
