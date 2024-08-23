@@ -2,6 +2,7 @@ import { Response } from "express";
 import { usersModel } from "../models";
 import dotenv from "dotenv";
 import { AuthenticatedRequest } from "../../types";
+import logger from "logger";
 dotenv.config();
 
 const createUser = async (
@@ -12,6 +13,7 @@ const createUser = async (
     const userInfo = req.user;
 
     if (!userInfo) {
+      logger.error("User information is missing.");
       res.status(400).send("User information is missing.");
       return;
     }
@@ -29,7 +31,7 @@ const createUser = async (
     // Check if user already exists
     const existingUser = await usersModel.findOne({ authId: userInfo.id });
     if (existingUser) {
-      console.log("User already exists");
+      logger.info("User already exists");
       res.status(200).send("User already exists");
       return;
     } else {
@@ -38,15 +40,16 @@ const createUser = async (
       const userCreated = await newUser.save();
 
       if (!userCreated) {
+        logger.error("Failed to create user.");
         res.status(500).send("Failed to create user.");
         return;
       }
 
-      console.log("User Created");
+      logger.info("User Created");
       res.status(201).send("User created successfully.");
     }
   } catch (err) {
-    console.error("Error creating user:", err);
+    logger.error("Error creating user:", err);
     res.status(500).send("Failed to create user. Please try again later.");
   }
 };

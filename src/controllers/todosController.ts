@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { Response } from "express";
 import { todoColumnModel, usersModel, todosModel } from "../models";
 import { AuthenticatedRequest } from "../../types";
+import logger from "../logger";
 
 dotenv.config();
 
@@ -16,13 +17,14 @@ const getTodoById = async (
     const todo = await todosModel.findOne({ uniqueId });
 
     if (!todo) {
+      logger.error("Todo not found.");
       res.status(404).send("Todo not found.");
       return;
     }
-    console.log("Sending Todo:", todo._id);
+    logger.info("Sending Todo:", todo._id);
     res.status(200).send(todo);
   } catch (err) {
-    console.error("Error getting todo:", err);
+    logger.error("Error getting todo:", err);
     res.status(500).send("Failed to get todo. Please try again later.");
   }
 };
@@ -35,6 +37,7 @@ const getTodos = async (
     const userInfo = req.user;
 
     if (!userInfo) {
+      logger.error("Unauthorized Access");
       res.status(400).send("Unauthorized Access");
       return;
     }
@@ -42,6 +45,7 @@ const getTodos = async (
     const user = await usersModel.findOne({ authId: userInfo.id });
 
     if (!user) {
+      logger.error("Unauthorized Access");
       res.status(409).send("Unauthorized Access");
       return;
     }
@@ -49,14 +53,15 @@ const getTodos = async (
     const todos = await todosModel.find({ userId: user._id });
 
     if (!todos || todos.length === 0) {
+      logger.error("Todos not found.");
       res.status(404).send("Todos not found.");
       return;
     }
 
-    console.log("Sending fetched columns");
+    logger.info("Sending fetched columns");
     res.status(200).send(todos);
   } catch (err) {
-    console.error("Error getting todos:", err);
+    logger.error("Error getting todos:", err);
     res.status(500).send("Failed to get todos. Please try again later.");
   }
 };
@@ -76,6 +81,7 @@ const createTodo = async (
     const userInfo = req.user;
 
     if (!userInfo) {
+      logger.error("Unauthorized Access");
       res.status(400).send("Unauthorized Access");
       return;
     }
@@ -83,6 +89,7 @@ const createTodo = async (
     const user = await usersModel.findOne({ authId: userInfo.id });
 
     if (!user) {
+      logger.error("Unauthorized Access");
       res.status(409).send("Unauthorized Access");
       return;
     }
@@ -100,6 +107,7 @@ const createTodo = async (
     const todoCreated = await todoData.save();
 
     if (!todoCreated) {
+      logger.error("Failed to create todo.");
       res.status(500).send("Failed to create todo.");
       return;
     }
@@ -128,10 +136,10 @@ const createTodo = async (
       return;
     }
 
-    console.log("Todo created and added to column successfully.");
+    logger.info("Todo created and added to column successfully.");
     res.status(201).send("Todo created successfully.");
   } catch (err) {
-    console.error("Error creating todo:", err);
+    logger.error("Error creating todo:", err);
     res.status(500).send("Failed to create todo. Please try again later.");
   }
 };
@@ -147,6 +155,7 @@ const updateTodo = async (
     const todo = await todosModel.findOne({ uniqueId: id });
 
     if (!todo) {
+      logger.error("Todo not found.");
       res.status(404).send("Todo not found.");
       return;
     }
@@ -160,14 +169,15 @@ const updateTodo = async (
     const todoUpdated = await todo.save();
 
     if (!todoUpdated) {
+      logger.error("Failed to update todo.");
       res.status(500).send("Failed to update todo.");
       return;
     }
 
-    console.log("Todo updated successfully.");
+    logger.info("Todo updated successfully.");
     res.status(200).send("Todo updated successfully.");
   } catch (err) {
-    console.error("Error updating todo:", err);
+    logger.error("Error updating todo:", err);
     res.status(500).send("Failed to update todo. Please try again later.");
   }
 };
@@ -182,6 +192,7 @@ const deleteTodo = async (
     const todo = await todosModel.findOne({ uniqueId: id });
 
     if (!todo) {
+      logger.error("Todo not found.");
       res.status(404).send("Todo not found.");
       return;
     }
@@ -197,7 +208,7 @@ const deleteTodo = async (
         const todoColumnSaved = await todoColumn.save();
 
         if (!todoColumnSaved) {
-          console.error("Failed to update todo column.");
+          logger.error("Failed to update todo column.");
           res.status(500).send("Failed to update todo column.");
           return;
         }
@@ -207,14 +218,15 @@ const deleteTodo = async (
     const todoDeleted = await todosModel.findOneAndDelete({ uniqueId: id });
 
     if (!todoDeleted) {
+      logger.error("Failed to delete todo.");
       res.status(500).send("Failed to delete todo.");
       return;
     }
 
-    console.log("Todo deleted successfully.");
+    logger.info("Todo deleted successfully.");
     res.status(200).send("Todo deleted successfully.");
   } catch (err) {
-    console.error("Error deleting todo:", err);
+    logger.error("Error deleting todo:", err);
     res.status(500).send("Failed to delete todo. Please try again later.");
   }
 };

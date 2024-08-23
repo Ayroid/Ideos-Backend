@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import pkg from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express"; // Assuming you're using Express
 import { StatusCodes } from "http-status-codes";
+import logger from "logger";
 
 dotenv.config();
 
@@ -56,6 +57,7 @@ const verifyToken = (
 ): void => {
   const token: string | undefined = req.headers.authorization;
   if (!token) {
+    logger.error("Access denied");
     res.status(StatusCodes.UNAUTHORIZED).json({ message: "Access denied" });
     return;
   }
@@ -64,6 +66,7 @@ const verifyToken = (
     req.user = decoded;
     next();
   } catch (error) {
+    logger.error("Invalid token", error);
     res.status(StatusCodes.UNAUTHORIZED).json({ message: "Invalid token" });
   }
 };
@@ -74,18 +77,21 @@ const verifyAccessToken = async (
 ): Promise<void> => {
   const token: string | undefined = req.headers.authorization;
   if (!token) {
+    logger.error("Access denied");
     res.status(StatusCodes.UNAUTHORIZED).json({ message: "Access denied" });
     return;
   }
   try {
     const tokenValid = await checkAccessToken(token, "access");
     if (tokenValid) {
+      logger.info("Token Verified");
       res.status(StatusCodes.OK).send("Token Verified");
       return;
     }
+    logger.error("Invalid token");
     res.status(StatusCodes.UNAUTHORIZED).json({ message: "Invalid token" });
   } catch (error) {
-    console.log("Error Verifying Token", { error });
+    logger.error("Error Verifying Token", { error });
     res.status(StatusCodes.UNAUTHORIZED).json({ message: "Invalid token" });
   }
 };
@@ -98,6 +104,7 @@ const refreshAccessToken = async (
     const token: string | undefined = req.headers.authorization;
     const tokenValid = await checkAccessToken(token!, "refresh");
     if (!tokenValid) {
+      logger.error("Invalid token");
       res.status(StatusCodes.UNAUTHORIZED).json({ message: "Invalid token" });
       return;
     }
@@ -109,6 +116,7 @@ const refreshAccessToken = async (
     const refreshToken = generateRefreshToken(payload);
     res.status(StatusCodes.OK).json({ accessToken, refreshToken });
   } catch (error) {
+    logger.error("Invalid token", error);
     res.status(StatusCodes.UNAUTHORIZED).json({ message: "Invalid token" });
   }
 };
