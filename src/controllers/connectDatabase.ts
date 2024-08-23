@@ -1,5 +1,5 @@
 import mongoose, { ConnectOptions } from "mongoose";
-import {developmentLogger} from "../logger";
+import logger from "../logger";
 class Database {
   private uri: string;
   private options: ConnectOptions;
@@ -12,20 +12,18 @@ class Database {
   async connect() {
     try {
       await mongoose.connect(this.uri, this.options);
-      console.log("Database connected");
-      // @ts-ignore
-      developmentLogger.info("database connected");
+      logger.info("Database Connected");
     } catch (error) {
-      console.log("Database Connection Error", error);
+      logger.error("Database Connection Error", error);
     }
   }
 
   async disconnect() {
     try {
       await mongoose.disconnect();
-      console.log("Database disconnected");
+      logger.info("Database Disconnected");
     } catch (error) {
-      console.log("Database disconnection Error", error);
+      logger.error("Database Disconnection Error", error);
     }
   }
 }

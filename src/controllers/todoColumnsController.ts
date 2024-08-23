@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import { Response } from "express";
 import { AuthenticatedRequest } from "../../types";
 import { todoColumnModel, usersModel } from "../models";
+import logger from "../logger";
 
 dotenv.config();
 
@@ -13,6 +14,7 @@ const getTodoColumns = async (
     const userInfo = req.user;
 
     if (!userInfo) {
+      logger.error("Unauthorized Access");
       res.status(400).send("Unauthorized Access");
       return;
     }
@@ -20,6 +22,7 @@ const getTodoColumns = async (
     const user = await usersModel.findOne({ authId: userInfo.id });
 
     if (!user) {
+      logger.error("Unauthorized Access");
       res.status(409).send("Unauthorized Access");
       return;
     }
@@ -29,14 +32,15 @@ const getTodoColumns = async (
       .populate("todoIds");
 
     if (!result) {
+      logger.error("TodoColumns not found");
       res.status(404).send([]);
       return;
     }
 
-    console.log("Sending fetched columns");
+    logger.info("TodoColumns read successfully.");
     res.status(200).send(result);
   } catch (err) {
-    console.error("Error getting TodoColumns:", err);
+    logger.error("Error getting TodoColumns:", err);
     res.status(500).send("Failed to get TodoColumns. Please try again later.");
   }
 };
@@ -49,13 +53,15 @@ const createTodoColumns = async (
     const { title, uniqueId } = req.body;
 
     if (!title || !uniqueId) {
-      res.status(400).send("All fields are required.");
+      logger.error("Error Fetching Columns: All fields are required.");
+      res.status(400).send("Error Fetching Columns: All fields are required.");
       return;
     }
 
     const userInfo = req.user;
 
     if (!userInfo) {
+      logger.error("Unauthorized Access");
       res.status(400).send("Unauthorized Access");
       return;
     }
@@ -63,6 +69,7 @@ const createTodoColumns = async (
     const user = await usersModel.findOne({ authId: userInfo.id });
 
     if (!user) {
+      logger.error("Unauthorized Access");
       res.status(409).send("Unauthorized Access");
       return;
     }
@@ -76,13 +83,14 @@ const createTodoColumns = async (
     const created = await data.save();
 
     if (!created) {
+      logger.error("Failed to create TodoColumns.");
       res.status(500).send("Failed to create TodoColumns.");
       return;
     }
-    console.log("TodoColumns created successfully.");
+    logger.info("TodoColumns created successfully.");
     res.status(201).send(created._id);
   } catch (err) {
-    console.error("Error creating TodoColumns:", err);
+    logger.error("Error creating TodoColumns:", err);
     res
       .status(500)
       .send("Failed to create TodoColumns. Please try again later.");
@@ -105,14 +113,15 @@ const updateTodosColumn = async (
     );
 
     if (!updated) {
+      logger.error("TodoColumns not updated.");
       res.status(404).send("TodoColumns not updated.");
       return;
     }
 
-    console.log("TodoColumns updated successfully.");
+    logger.info("TodoColumns updated successfully.");
     res.status(200).send("TodoColumns updated successfully.");
   } catch (err) {
-    console.error("Error updating todo:", err);
+    logger.error("Error updating TodoColumns:", err);
     res.status(500).send("Failed to update todo. Please try again later.");
   }
 };
@@ -127,13 +136,14 @@ const deleteTodosColumn = async (
     const todo = await todoColumnModel.findOneAndDelete({ uniqueId: id });
 
     if (!todo) {
+      console.log("TodoColumns not found.");
       res.status(404).send("TodoColumns not found.");
       return;
     }
-    console.log("TodoColumns deleted successfully.");
+    logger.info("TodoColumns deleted successfully.");
     res.status(200).send("TodoColumns deleted successfully.");
   } catch (err) {
-    console.error("Error deleting TodoColumns:", err);
+    logger.error("Error deleting TodoColumns:", err);
     res
       .status(500)
       .send("Failed to delete TodoColumns. Please try again later.");

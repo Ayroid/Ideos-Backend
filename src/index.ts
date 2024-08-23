@@ -9,6 +9,7 @@ const {
   protectRoute,
   getUser,
 } = require("@kinde-oss/kinde-node-express");
+import logger from "./logger";
 
 import { todosRouter, usersRouter, todoColumnsRouter } from "./routes";
 
@@ -42,6 +43,7 @@ app.use(express.static("public"));
 app.use("/api/images", express.static("public/images"));
 
 app.get("/api/test", (req, res) => {
+  logger.info("Test Route");
   res.send("Application is running.");
 });
 
@@ -50,8 +52,14 @@ app.get(
   protectRoute,
   getUser,
   async (req: AuthenticatedRequest, res) => {
-    const userInfo = req.user;
-    res.json({ message: "Protected Routes", user: userInfo });
+    try {
+      const userInfo = req.user;
+      logger.info("Protected Route Accessed", userInfo);
+      res.json({ message: "Protected Routes", user: userInfo });
+    } catch (error) {
+      logger.error("Error in protected route", error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
   }
 );
 
@@ -63,10 +71,11 @@ process.on("SIGINT", () => {
   database
     .disconnect()
     .then(() => {
+      logger.info("Database connection closed.");
       process.exit(0);
     })
     .catch((err) => {
-      console.error(err);
+      logger.error("Error closing database connection", err);
       process.exit(1);
     });
 });
