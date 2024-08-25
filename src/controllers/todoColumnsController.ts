@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { Response } from "express";
 import { AuthenticatedRequest } from "../../types";
-import { todoColumnModel, usersModel } from "../models";
+import { todoColumnModel, usersModel, todosModel } from "../models";
 import logger from "../logger";
 
 dotenv.config();
@@ -140,6 +140,11 @@ const deleteTodosColumn = async (
       res.status(404).send("TodoColumns not found.");
       return;
     }
+
+    todo.todoIds?.forEach(async (todoId) => {
+      await todosModel.findOneAndDelete({ _id: todoId });
+    });
+
     logger.info("TodoColumns deleted successfully.");
     res.status(200).send("TodoColumns deleted successfully.");
   } catch (err) {
