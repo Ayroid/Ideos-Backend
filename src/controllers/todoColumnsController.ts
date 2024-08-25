@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 import { Response } from "express";
 import { AuthenticatedRequest } from "../../types";
-import { todoColumnModel, usersModel, todosModel } from "../models";
 import logger from "../logger";
+import { todoColumnModel, usersModel, todosModel } from "../models";
 
 dotenv.config();
 
@@ -50,9 +50,9 @@ const createTodoColumns = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { title, uniqueId } = req.body;
+    const { title, uniqueId, color } = req.body;
 
-    if (!title || !uniqueId) {
+    if (!title || !uniqueId || !color) {
       logger.error("Error Fetching Columns: All fields are required.");
       res.status(400).send("Error Fetching Columns: All fields are required.");
       return;
@@ -77,6 +77,7 @@ const createTodoColumns = async (
     const data = new todoColumnModel({
       userId: user?._id,
       title,
+      color,
       uniqueId,
     });
 

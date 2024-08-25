@@ -1,9 +1,10 @@
-import mongoose, { Schema, model, Document } from "mongoose";
+import mongoose, { Document, Schema, model } from "mongoose";
 
 export interface ITodoColumn extends Document {
   userId: mongoose.Types.ObjectId;
   uniqueId: string;
   title: string;
+  color: string;
   todoIds?: mongoose.Types.ObjectId[];
 }
 
@@ -20,6 +21,11 @@ const todoColumnSchema: Schema<ITodoColumn> = new Schema(
     },
     title: {
       type: String,
+      required: true,
+    },
+    color: {
+      type: String,
+      default: "#000000",
       required: true,
     },
     todoIds: {
