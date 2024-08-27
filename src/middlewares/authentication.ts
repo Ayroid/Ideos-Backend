@@ -13,12 +13,12 @@ interface Payload {
   id: string;
 }
 
-const ACCESS_TOKEN_SECRET: string | undefined = process.env.ACCESS_TOKEN_SECRET;
-const ACCESS_TOKEN_EXPIRY: string | undefined = process.env.ACCESS_TOKEN_EXPIRY;
+const ACCESS_TOKEN_SECRET: string | undefined = "asdnasakd22@w83sdag928@#@#71273k$!@";
+const ACCESS_TOKEN_EXPIRY: string | undefined = "86400";
 const REFRESH_TOKEN_SECRET: string | undefined =
-  process.env.REFRESH_TOKEN_SECRET;
+  "uah@!@w8721632jhnjs$!$2!@dgsdfwe523";
 const REFRESH_TOKEN_EXPIRY: string | undefined =
-  process.env.REFRESH_TOKEN_EXPIRY;
+  "2592000";
 
 const generateAccessToken = (payload: Payload): string => {
   return sign(payload, ACCESS_TOKEN_SECRET!, {

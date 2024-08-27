@@ -8,6 +8,7 @@ const {
   setupKinde,
   protectRoute,
   getUser,
+  GrantType,
 } = require("@kinde-oss/kinde-node-express");
 import logger from "./logger";
 
@@ -16,20 +17,21 @@ import { todosRouter, usersRouter, todoColumnsRouter } from "./routes";
 dotenv.config();
 
 const PORT = process.env.PORT ?? 5000;
-const MONGODB_URI = process.env.MONGODB_URI!;
+const MONGODB_URI =
+  "mongodb+srv://ideos:tgmpeGz1pxPcsTC9@ideos.p5eiugq.mongodb.net/development"!;
 
 const app = express();
 
 const kindeConfig = {
-  clientId: process.env.CLIENT_ID,
-  issuerBaseUrl: process.env.ISSUER_BASE_URL,
-  siteUrl: process.env.SITE_URL,
-  secret: process.env.SECRET,
-  redirectUrl: process.env.REDIRECT_URL,
-  scope: process.env.SCOPE,
-  grantType: process.env.GRANT_TYPE,
-  unAuthorisedUrl: process.env.UNAUTHORISED_URL,
-  postLogoutRedirectUrl: process.env.POST_LOGOUT_REDIRECT_URL,
+  clientId: "7227012ff53145f6bc3acf3271799450",
+  issuerBaseUrl: "https://iideos.kinde.com",
+  siteUrl: "https://api.ideos.live",
+  secret: "ecw1h97HMMpSpli5bSmVIv6zqTLilZvPEicj5aclIfhsFaHjG",
+  redirectUrl: "https://api.ideos.live",
+  scope: "openid profile email",
+  grantType: GrantType.PKCE,
+  unAuthorisedUrl: "https://api.ideos.live/unauthorised",
+  postLogoutRedirectUrl: "https://api.ideos.live",
 };
 
 setupKinde(kindeConfig, app);
@@ -40,15 +42,15 @@ database.connect();
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
-app.use("/api/images", express.static("public/images"));
+app.use("/images", express.static("public/images"));
 
-app.get("/api/test", (req, res) => {
+app.get("/test", (req, res) => {
   logger.info("Test Route");
   res.send("Application is running.");
 });
 
 app.get(
-  "/api/protected",
+  "/protected",
   protectRoute,
   getUser,
   async (req: AuthenticatedRequest, res) => {
@@ -63,9 +65,26 @@ app.get(
   }
 );
 
-app.use("/api/users", protectRoute, getUser, usersRouter);
-app.use("/api/todoColumns", protectRoute, getUser, todoColumnsRouter);
-app.use("/api/todos", protectRoute, getUser, todosRouter);
+app.use("/users", protectRoute, getUser, usersRouter);
+app.use(
+  "/todoColumns",
+  (req, res, next) => {
+    console.log("Column 1");
+    next();
+  },
+  protectRoute,
+  (req, res, next) => {
+    console.log("Column 2");
+    next();
+  },
+  getUser,
+  (req, res, next) => {
+    console.log("Column 3");
+    next();
+  },
+  todoColumnsRouter
+);
+app.use("/todos", protectRoute, getUser, todosRouter);
 
 process.on("SIGINT", () => {
   database
