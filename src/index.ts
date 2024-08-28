@@ -17,21 +17,20 @@ import { todosRouter, usersRouter, todoColumnsRouter } from "./routes";
 dotenv.config();
 
 const PORT = process.env.PORT ?? 5000;
-const MONGODB_URI =
-  "mongodb+srv://ideos:tgmpeGz1pxPcsTC9@ideos.p5eiugq.mongodb.net/development"!;
+const MONGODB_URI = process.env.MONGODB_URI!;
 
 const app = express();
 
 const kindeConfig = {
-  clientId: "7227012ff53145f6bc3acf3271799450",
-  issuerBaseUrl: "https://iideos.kinde.com",
-  siteUrl: "https://api.ideos.live",
-  secret: "ecw1h97HMMpSpli5bSmVIv6zqTLilZvPEicj5aclIfhsFaHjG",
-  redirectUrl: "https://api.ideos.live",
-  scope: "openid profile email",
-  grantType: GrantType.PKCE,
-  unAuthorisedUrl: "https://api.ideos.live/unauthorised",
-  postLogoutRedirectUrl: "https://api.ideos.live",
+  clientId: process.env.CLIENT_ID!,
+  issuerBaseUrl: process.env.ISSUER_BASE_URL!,
+  siteUrl: process.env.SITE_URL!,
+  secret: process.env.SECRET!,
+  redirectUrl: process.env.REDIRECT_URL!,
+  scope: process.env.SCOPE!,
+  grantType: GrantType.PKCE!,
+  unAuthorisedUrl: process.env.UNAUTHORISED_URL!,
+  postLogoutRedirectUrl: process.env.POST_LOGOUT_REDIRECT_URL!,
 };
 
 setupKinde(kindeConfig, app);
@@ -66,24 +65,7 @@ app.get(
 );
 
 app.use("/users", protectRoute, getUser, usersRouter);
-app.use(
-  "/todoColumns",
-  (req, res, next) => {
-    console.log("Column 1");
-    next();
-  },
-  protectRoute,
-  (req, res, next) => {
-    console.log("Column 2");
-    next();
-  },
-  getUser,
-  (req, res, next) => {
-    console.log("Column 3");
-    next();
-  },
-  todoColumnsRouter
-);
+app.use("/todoColumns", protectRoute, getUser, todoColumnsRouter);
 app.use("/todos", protectRoute, getUser, todosRouter);
 
 process.on("SIGINT", () => {
