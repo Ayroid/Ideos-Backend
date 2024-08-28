@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import express from "express";
 import { AuthenticatedRequest } from "../types";
 import { Database } from "./controllers/connectDatabase";
+import { initializeReminderService } from '../src/utils/mailer';
+
 const {
   setupKinde,
   protectRoute,
@@ -46,7 +48,7 @@ app.get("/api/test", (req, res) => {
   logger.info("Test Route");
   res.send("Application is running.");
 });
-
+initializeReminderService();
 app.get(
   "/api/protected",
   protectRoute,
