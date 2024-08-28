@@ -83,7 +83,7 @@ async function checkTodos() {
 }
 
 export function initializeReminderService() {
-  schedule.scheduleJob("* * * * *", () => {
+  schedule.scheduleJob("0 0 * * *", () => {
     logger.info("Running reminder job...");
     checkTodos();
   });
