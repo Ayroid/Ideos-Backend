@@ -9,7 +9,6 @@ const {
   getUser,
   GrantType,
 } = require("@kinde-oss/kinde-node-express");
-import {} from "@models";
 
 import { AuthenticatedRequest } from "@types";
 import { Database } from "@controllers/connectDatabase";

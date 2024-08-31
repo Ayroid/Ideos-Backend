@@ -1,12 +1,12 @@
-import mongoose, { Document,model,Schema } from "mongoose";
+import mongoose, { Document, model, Schema } from "mongoose";
 
 export interface IPomodoroSession extends Document {
   userId: mongoose.Types.ObjectId;
-  totalTime : number;
-  startTime : Date;
-  endTime : Date;
-  sessionTypeId : mongoose.Types.ObjectId;
-  sessionCount : number;
+  totalTime: number;
+  startTime: Date;
+  endTime: Date;
+  sessionTypeId: mongoose.Types.ObjectId;
+  sessionCount: number;
 }
 
 const PomodoroSessionSchema: Schema<IPomodoroSession> = new Schema(
@@ -17,25 +17,28 @@ const PomodoroSessionSchema: Schema<IPomodoroSession> = new Schema(
       required: true,
     },
     totalTime: {
-        type: Number,
-        required: true,
+      type: Number,
+      required: true,
+      default: 0,
     },
     startTime: {
-        type: Date,
-        required: true,
+      type: Date,
+      required: true,
+      default: Date.now(),
     },
     endTime: {
-        type: Date,
-        required: true,
+      type: Date,
+      required: true,
     },
     sessionTypeId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "pomodoroSessionTypes",
-        required: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "pomodoroSessionTypes",
+      required: true,
     },
     sessionCount: {
-        type: Number,
-        required: true,
+      type: Number,
+      required: true,
+      default: 0,
     },
   },
   {
@@ -43,4 +46,7 @@ const PomodoroSessionSchema: Schema<IPomodoroSession> = new Schema(
   }
 );
 
-export const pomodoroSessionModel = model<IPomodoroSession>("pomodoroSessions", PomodoroSessionSchema);
+export const pomodoroSessionModel = model<IPomodoroSession>(
+  "pomodoroSessions",
+  PomodoroSessionSchema
+);
