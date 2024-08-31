@@ -11,7 +11,7 @@ import {
 } from "./pomodoro/pomodoroSessionTypesModel";
 import {
   IPomodoroSessionSettings,
-  pomodoroSessionSettingsModel,
+  pomodoroSettingsModel,
 } from "./pomodoro/pomodoroSettingsModel";
 export {
   IUser,
@@ -25,5 +25,5 @@ export {
   IPomodoroSessionTypes,
   pomodoroSessionTypesModel,
   IPomodoroSessionSettings,
-  pomodoroSessionSettingsModel,
+  pomodoroSettingsModel,
 };

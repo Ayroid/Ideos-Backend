@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { pomodoroSessionSettingsModel, usersModel } from "@models";
+import { pomodoroSettingsModel, usersModel } from "@models";
 import { AuthenticatedRequest } from "@types";
 import logger from "@logger";
 
@@ -34,7 +34,7 @@ const createPomodoroSessionSettings = async (
       return;
     }
 
-    const sessionSettingsData = new pomodoroSessionSettingsModel({
+    const sessionSettingsData = new pomodoroSettingsModel({
       userId: user._id,
       wallpaper,
       alarmTone,
@@ -83,7 +83,7 @@ const getPomodoroSessionSettings = async (
       return;
     }
 
-    const sessionSettings = await pomodoroSessionSettingsModel
+    const sessionSettings = await pomodoroSettingsModel
       .find({ userId: user._id })
       .populate("pomodoroSessionTypes");
 
@@ -111,7 +111,7 @@ const updatePomodoroSessionSettings = async (
     const { id } = req.params;
     const { wallpaper, alarmTone, fontType, pomodoroSessionTypes } = req.body;
 
-    const sessionSettings = await pomodoroSessionSettingsModel.findById(id);
+    const sessionSettings = await pomodoroSettingsModel.findById(id);
 
     if (!sessionSettings) {
       logger.error("Pomodoro session settings not found.");
@@ -151,7 +151,7 @@ const deletePomodoroSessionSettings = async (
     const { id } = req.params;
 
     const sessionSettingsDeleted =
-      await pomodoroSessionSettingsModel.findByIdAndDelete(id);
+      await pomodoroSettingsModel.findByIdAndDelete(id);
 
     if (!sessionSettingsDeleted) {
       logger.error("Failed to delete Pomodoro session settings.");
