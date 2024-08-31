@@ -6,7 +6,7 @@ import {
   createTodo,
   updateTodo,
   deleteTodo,
-} from "../controllers/todosController";
+} from "@controllers/todosController";
 
 const todosRouter: Router = Router();
 

@@ -1,18 +1,20 @@
 // src/index.ts
+require("module-alias/register");
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
-import { AuthenticatedRequest } from "../types";
-import { Database } from "./controllers/connectDatabase";
 const {
   setupKinde,
   protectRoute,
   getUser,
   GrantType,
 } = require("@kinde-oss/kinde-node-express");
-import logger from "./logger";
+import {} from "@models";
 
-import { todosRouter, usersRouter, todoColumnsRouter } from "./routes";
+import { AuthenticatedRequest } from "@types";
+import { Database } from "@controllers/connectDatabase";
+import logger from "@logger";
+import { todosRouter, usersRouter, todoColumnsRouter } from "@routes";
 
 dotenv.config();
 

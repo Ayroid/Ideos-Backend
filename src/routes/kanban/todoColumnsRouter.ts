@@ -5,11 +5,14 @@ import {
   createTodoColumns,
   updateTodosColumn,
   deleteTodosColumn,
-} from "../controllers/todoColumnsController";
+} from "@controllers/todoColumnsController";
 
 const todoColumnsRouter: Router = Router();
 
 todoColumnsRouter.route("/").get(getTodoColumns).post(createTodoColumns);
-todoColumnsRouter.route("/:id").put(updateTodosColumn).delete(deleteTodosColumn);
+todoColumnsRouter
+  .route("/:id")
+  .put(updateTodosColumn)
+  .delete(deleteTodosColumn);
 
 export { todoColumnsRouter };
