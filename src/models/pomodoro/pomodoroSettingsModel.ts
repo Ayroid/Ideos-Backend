@@ -8,41 +8,40 @@ export interface IPomodoroSessionSettings extends Document {
   pomodoroSessionTypes: mongoose.Types.ObjectId[];
 }
 
-const PomodoroSessionSettingsSchema: Schema<IPomodoroSessionSettings> =
-  new Schema(
-    {
-      userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "users",
-        required: true,
-      },
-      wallpaper: {
-        type: String,
-        required: true,
-        // TODO: Add default ideos wallpaper
-      },
-      alarmTone: {
-        type: String,
-        required: true,
-        // TODO: Add default alarm tone
-      },
-      fontType: {
-        type: String,
-        required: true,
-        default: "Arial",
-      },
-      pomodoroSessionTypes: {
-        type: [mongoose.Schema.Types.ObjectId],
-        ref: "pomodoroSessionTypes",
-        default: [],
-      },
+const PomodoroSettingsSchema: Schema<IPomodoroSessionSettings> = new Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "users",
+      required: true,
     },
-    {
-      timestamps: true,
-    }
-  );
+    wallpaper: {
+      type: String,
+      required: true,
+      // TODO: Add default ideos wallpaper
+    },
+    alarmTone: {
+      type: String,
+      required: true,
+      // TODO: Add default alarm tone
+    },
+    fontType: {
+      type: String,
+      required: true,
+      default: "Arial",
+    },
+    pomodoroSessionTypes: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "pomodoroSessionTypes",
+      default: [],
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-export const pomodoroSessionSettingsModel = model<IPomodoroSessionSettings>(
-  "pomodoroSessionSettings",
-  PomodoroSessionSettingsSchema
+export const pomodoroSettingsModel = model<IPomodoroSessionSettings>(
+  "pomodoroSettings",
+  PomodoroSettingsSchema
 );

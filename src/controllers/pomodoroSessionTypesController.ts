@@ -8,11 +8,23 @@ const createPomodoroSessionType = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { sessionName, pomodoroDuration, shortBreakDuration, longBreakDuration } = req.body;
+    const {
+      sessionName,
+      pomodoroDuration,
+      shortBreakDuration,
+      longBreakDuration,
+    } = req.body;
 
-    if (!sessionName || !pomodoroDuration || !shortBreakDuration || !longBreakDuration) {
+    if (
+      !sessionName ||
+      !pomodoroDuration ||
+      !shortBreakDuration ||
+      !longBreakDuration
+    ) {
       logger.error("Error Creating Session Type: All fields are required.");
-      res.status(400).send("Error Creating Session Type: All fields are required.");
+      res
+        .status(400)
+        .send("Error Creating Session Type: All fields are required.");
       return;
     }
 
@@ -52,7 +64,9 @@ const createPomodoroSessionType = async (
     res.status(201).send("Pomodoro session type created successfully.");
   } catch (err) {
     logger.error("Error creating Pomodoro session type:", err);
-    res.status(500).send("Failed to create Pomodoro session type. Please try again later.");
+    res
+      .status(500)
+      .send("Failed to create Pomodoro session type. Please try again later.");
   }
 };
 
@@ -77,7 +91,9 @@ const getPomodoroSessionTypes = async (
       return;
     }
 
-    const sessionTypes = await pomodoroSessionTypesModel.find({ userId: user._id });
+    const sessionTypes = await pomodoroSessionTypesModel.find({
+      userId: user._id,
+    });
 
     if (!sessionTypes || sessionTypes.length === 0) {
       logger.error("Pomodoro session types not found.");
@@ -89,7 +105,9 @@ const getPomodoroSessionTypes = async (
     res.status(200).send(sessionTypes);
   } catch (err) {
     logger.error("Error getting Pomodoro session types:", err);
-    res.status(500).send("Failed to get Pomodoro session types. Please try again later.");
+    res
+      .status(500)
+      .send("Failed to get Pomodoro session types. Please try again later.");
   }
 };
 
@@ -99,7 +117,12 @@ const updatePomodoroSessionType = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const { sessionName, pomodoroDuration, shortBreakDuration, longBreakDuration } = req.body;
+    const {
+      sessionName,
+      pomodoroDuration,
+      shortBreakDuration,
+      longBreakDuration,
+    } = req.body;
 
     const sessionType = await pomodoroSessionTypesModel.findById(id);
 
@@ -110,9 +133,12 @@ const updatePomodoroSessionType = async (
     }
 
     sessionType.sessionName = sessionName || sessionType.sessionName;
-    sessionType.pomodoroDuration = pomodoroDuration || sessionType.pomodoroDuration;
-    sessionType.shortBreakDuration = shortBreakDuration || sessionType.shortBreakDuration;
-    sessionType.longBreakDuration = longBreakDuration || sessionType.longBreakDuration;
+    sessionType.pomodoroDuration =
+      pomodoroDuration || sessionType.pomodoroDuration;
+    sessionType.shortBreakDuration =
+      shortBreakDuration || sessionType.shortBreakDuration;
+    sessionType.longBreakDuration =
+      longBreakDuration || sessionType.longBreakDuration;
 
     const sessionTypeUpdated = await sessionType.save();
 
@@ -126,7 +152,9 @@ const updatePomodoroSessionType = async (
     res.status(200).send("Pomodoro session type updated successfully.");
   } catch (err) {
     logger.error("Error updating Pomodoro session type:", err);
-    res.status(500).send("Failed to update Pomodoro session type. Please try again later.");
+    res
+      .status(500)
+      .send("Failed to update Pomodoro session type. Please try again later.");
   }
 };
 
@@ -137,7 +165,8 @@ const deletePomodoroSessionType = async (
   try {
     const { id } = req.params;
 
-    const sessionTypeDeleted = await pomodoroSessionTypesModel.findByIdAndDelete(id);
+    const sessionTypeDeleted =
+      await pomodoroSessionTypesModel.findByIdAndDelete(id);
 
     if (!sessionTypeDeleted) {
       logger.error("Failed to delete Pomodoro session type.");
@@ -149,7 +178,9 @@ const deletePomodoroSessionType = async (
     res.status(200).send("Pomodoro session type deleted successfully.");
   } catch (err) {
     logger.error("Error deleting Pomodoro session type:", err);
-    res.status(500).send("Failed to delete Pomodoro session type. Please try again later.");
+    res
+      .status(500)
+      .send("Failed to delete Pomodoro session type. Please try again later.");
   }
 };
 
