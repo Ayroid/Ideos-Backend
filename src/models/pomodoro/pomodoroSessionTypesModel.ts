@@ -3,7 +3,7 @@ import mongoose, { Document, model,Schema } from "mongoose";
 export interface IPomodoroSessionTypes extends Document {
     userId: mongoose.Types.ObjectId;
     sessionName : string;
-    sessionDuration : number;
+    pomodoroDuration : number;
     shortBreakDuration : number;
     longBreakDuration : number;
     }
@@ -19,7 +19,7 @@ export interface IPomodoroSessionTypes extends Document {
             type: String,
             required: true,
         },
-        sessionDuration: {
+        pomodoroDuration: {
             type: Number,
             required: true,
         },
