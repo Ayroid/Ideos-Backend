@@ -8,16 +8,6 @@ const createPomodoroSessionSettings = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { wallpaper, alarmTone, fontType, pomodoroTemplates } = req.body;
-
-    if (!wallpaper || !alarmTone || !fontType) {
-      logger.error("Error Creating Session Settings: All fields are required.");
-      res
-        .status(400)
-        .send("Error Creating Session Settings: All fields are required.");
-      return;
-    }
-
     const userInfo = req.user;
 
     if (!userInfo) {
@@ -36,10 +26,6 @@ const createPomodoroSessionSettings = async (
 
     const sessionSettingsData = new pomodoroSettingsModel({
       userId: user._id,
-      wallpaper,
-      alarmTone,
-      fontType,
-      pomodoroTemplates,
     });
 
     const sessionSettingsCreated = await sessionSettingsData.save();
@@ -109,7 +95,13 @@ const updatePomodoroSessionSettings = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const { wallpaper, alarmTone, fontType, pomodoroTemplates } = req.body;
+    const {
+      wallpaper,
+      alarmTone,
+      fontType,
+      activePomodoroTemplateId,
+      pomodoroTemplates,
+    } = req.body;
 
     const sessionSettings = await pomodoroSettingsModel.findById(id);
 
@@ -122,6 +114,8 @@ const updatePomodoroSessionSettings = async (
     sessionSettings.wallpaper = wallpaper || sessionSettings.wallpaper;
     sessionSettings.alarmTone = alarmTone || sessionSettings.alarmTone;
     sessionSettings.fontType = fontType || sessionSettings.fontType;
+    sessionSettings.activePomodoroTemplateId =
+      activePomodoroTemplateId || sessionSettings.activePomodoroTemplateId;
     sessionSettings.pomodoroTemplates =
       pomodoroTemplates || sessionSettings.pomodoroTemplates;
     const sessionSettingsUpdated = await sessionSettings.save();

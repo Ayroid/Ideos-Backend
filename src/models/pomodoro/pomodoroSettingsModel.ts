@@ -18,23 +18,20 @@ const PomodoroSettingsSchema: Schema<IPomodoroSessionSettings> = new Schema(
     },
     wallpaper: {
       type: String,
-      // required: true,
       // TODO: Add default ideos wallpaper
     },
     alarmTone: {
       type: String,
-      // required: true,
       // TODO: Add default alarm tone
     },
     fontType: {
       type: String,
-      // required: true,
       default: "Arial",
     },
     activePomodoroTemplateId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "pomodoroTemplates",
-      required: true,
+      default: null,
     },
     pomodoroTemplates: {
       type: [mongoose.Schema.Types.ObjectId],
