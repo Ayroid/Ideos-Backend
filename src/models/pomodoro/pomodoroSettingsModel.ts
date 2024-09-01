@@ -5,6 +5,7 @@ export interface IPomodoroSessionSettings extends Document {
   wallpaper: string;
   alarmTone: string;
   fontType: string;
+  activePomodoroTemplateId: mongoose.Types.ObjectId;
   pomodoroTemplates: mongoose.Types.ObjectId[];
 }
 
@@ -17,18 +18,23 @@ const PomodoroSettingsSchema: Schema<IPomodoroSessionSettings> = new Schema(
     },
     wallpaper: {
       type: String,
-      required: true,
+      // required: true,
       // TODO: Add default ideos wallpaper
     },
     alarmTone: {
       type: String,
-      required: true,
+      // required: true,
       // TODO: Add default alarm tone
     },
     fontType: {
       type: String,
-      required: true,
+      // required: true,
       default: "Arial",
+    },
+    activePomodoroTemplateId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "pomodoroTemplates",
+      required: true,
     },
     pomodoroTemplates: {
       type: [mongoose.Schema.Types.ObjectId],

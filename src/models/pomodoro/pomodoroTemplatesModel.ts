@@ -2,7 +2,7 @@ import mongoose, { Document, model, Schema } from "mongoose";
 
 export interface IPomodoroTemplates extends Document {
   userId: mongoose.Types.ObjectId;
-  sessionName: string;
+  templateName: string;
   pomodoroDuration: number;
   shortBreakDuration: number;
   longBreakDuration: number;
@@ -15,7 +15,7 @@ const PomodoroTemplatesSchema: Schema<IPomodoroTemplates> = new Schema(
       ref: "users",
       required: true,
     },
-    sessionName: {
+    templateName: {
       type: String,
       required: true,
     },
