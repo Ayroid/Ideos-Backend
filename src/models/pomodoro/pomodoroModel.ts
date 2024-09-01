@@ -30,7 +30,7 @@ const PomodoroSessionSchema: Schema<IPomodoroSession> = new Schema(
     },
     sessionTypeId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "pomodoroTemplates",
+      ref: "pomodorotemplates",
       required: true,
     },
     sessionCount: {
@@ -44,6 +44,6 @@ const PomodoroSessionSchema: Schema<IPomodoroSession> = new Schema(
 );
 
 export const pomodoroSessionModel = model<IPomodoroSession>(
-  "pomodoroSessions",
+  "pomodorosessions",
   PomodoroSessionSchema
 );

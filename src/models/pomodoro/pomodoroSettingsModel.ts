@@ -6,7 +6,7 @@ export interface IPomodoroSessionSettings extends Document {
   alarmTone: string;
   fontType: string;
   activePomodoroTemplateId: mongoose.Types.ObjectId;
-  pomodoroTemplates: mongoose.Types.ObjectId[];
+  userPomodoroTemplateIds: mongoose.Types.ObjectId[];
 }
 
 const PomodoroSettingsSchema: Schema<IPomodoroSessionSettings> = new Schema(
@@ -30,12 +30,12 @@ const PomodoroSettingsSchema: Schema<IPomodoroSessionSettings> = new Schema(
     },
     activePomodoroTemplateId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "pomodoroTemplates",
+      ref: "pomodorotemplates",
       default: null,
     },
-    pomodoroTemplates: {
+    userPomodoroTemplateIds: {
       type: [mongoose.Schema.Types.ObjectId],
-      ref: "pomodoroTemplates",
+      ref: "pomodorotemplates",
       default: [],
     },
   },
@@ -45,6 +45,6 @@ const PomodoroSettingsSchema: Schema<IPomodoroSessionSettings> = new Schema(
 );
 
 export const pomodoroSettingsModel = model<IPomodoroSessionSettings>(
-  "pomodoroSettings",
+  "pomodorosettings",
   PomodoroSettingsSchema
 );

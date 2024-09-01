@@ -3,7 +3,7 @@ import { pomodoroTemplatesModel, usersModel } from "@models";
 import { AuthenticatedRequest } from "@types";
 import logger from "@logger";
 
-const createPomodoroSessionType = async (
+const createPomodoroTemplate = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
@@ -21,10 +21,12 @@ const createPomodoroSessionType = async (
       !shortBreakDuration ||
       !longBreakDuration
     ) {
-      logger.error("Error Creating Session Type: All fields are required.");
+      logger.error(
+        "Error Creating Pomodoro Template: All fields are required."
+      );
       res
         .status(400)
-        .send("Error Creating Session Type: All fields are required.");
+        .send("Error Creating Pomodoro Template: All fields are required.");
       return;
     }
 
@@ -55,18 +57,18 @@ const createPomodoroSessionType = async (
     const sessionTypeCreated = await sessionTypeData.save();
 
     if (!sessionTypeCreated) {
-      logger.error("Failed to create Pomodoro session type.");
-      res.status(500).send("Failed to create Pomodoro session type.");
+      logger.error("Failed to create Pomodoro Template.");
+      res.status(500).send("Failed to create Pomodoro Template.");
       return;
     }
 
-    logger.info("Pomodoro session type created successfully.");
-    res.status(201).send("Pomodoro session type created successfully.");
+    logger.info("Pomodoro Template created successfully.");
+    res.status(201).send("Pomodoro Template created successfully.");
   } catch (err) {
-    logger.error("Error creating Pomodoro session type:", err);
+    logger.error("Error creating Pomodoro Template:", err);
     res
       .status(500)
-      .send("Failed to create Pomodoro session type. Please try again later.");
+      .send("Failed to create Pomodoro Template. Please try again later.");
   }
 };
 
@@ -96,29 +98,29 @@ const getPomodoroTemplates = async (
     });
 
     if (!Templates || Templates.length === 0) {
-      logger.error("Pomodoro session types not found.");
-      res.status(404).send("Pomodoro session types not found.");
+      logger.error("Pomodoro Template not found.");
+      res.status(404).send("Pomodoro Template not found.");
       return;
     }
 
-    logger.info("Sending fetched Pomodoro session types");
+    logger.info("Sending fetched Pomodoro Template");
     res.status(200).send(Templates);
   } catch (err) {
-    logger.error("Error getting Pomodoro session types:", err);
+    logger.error("Error getting Pomodoro Template:", err);
     res
       .status(500)
-      .send("Failed to get Pomodoro session types. Please try again later.");
+      .send("Failed to get Pomodoro Template. Please try again later.");
   }
 };
 
-const updatePomodoroSessionType = async (
+const updatePomodoroTemplate = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
   try {
     const { id } = req.params;
     const {
-      sessionName,
+      templateName,
       pomodoroDuration,
       shortBreakDuration,
       longBreakDuration,
@@ -127,12 +129,12 @@ const updatePomodoroSessionType = async (
     const sessionType = await pomodoroTemplatesModel.findById(id);
 
     if (!sessionType) {
-      logger.error("Pomodoro session type not found.");
-      res.status(404).send("Pomodoro session type not found.");
+      logger.error("Pomodoro Template not found.");
+      res.status(404).send("Pomodoro Template not found.");
       return;
     }
 
-    sessionType.sessionName = sessionName || sessionType.sessionName;
+    sessionType.templateName = templateName || sessionType.templateName;
     sessionType.pomodoroDuration =
       pomodoroDuration || sessionType.pomodoroDuration;
     sessionType.shortBreakDuration =
@@ -143,22 +145,22 @@ const updatePomodoroSessionType = async (
     const sessionTypeUpdated = await sessionType.save();
 
     if (!sessionTypeUpdated) {
-      logger.error("Failed to update Pomodoro session type.");
-      res.status(500).send("Failed to update Pomodoro session type.");
+      logger.error("Failed to update Pomodoro Template.");
+      res.status(500).send("Failed to update Pomodoro Template.");
       return;
     }
 
-    logger.info("Pomodoro session type updated successfully.");
-    res.status(200).send("Pomodoro session type updated successfully.");
+    logger.info("Pomodoro Template updated successfully.");
+    res.status(200).send("Pomodoro Template updated successfully.");
   } catch (err) {
-    logger.error("Error updating Pomodoro session type:", err);
+    logger.error("Error updating Pomodoro Template:", err);
     res
       .status(500)
-      .send("Failed to update Pomodoro session type. Please try again later.");
+      .send("Failed to update Pomodoro Template. Please try again later.");
   }
 };
 
-const deletePomodoroSessionType = async (
+const deletePomodoroTemplate = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
@@ -170,24 +172,24 @@ const deletePomodoroSessionType = async (
     );
 
     if (!sessionTypeDeleted) {
-      logger.error("Failed to delete Pomodoro session type.");
-      res.status(500).send("Failed to delete Pomodoro session type.");
+      logger.error("Failed to delete Pomodoro Template.");
+      res.status(500).send("Failed to delete Pomodoro Template.");
       return;
     }
 
-    logger.info("Pomodoro session type deleted successfully.");
-    res.status(200).send("Pomodoro session type deleted successfully.");
+    logger.info("Pomodoro Template deleted successfully.");
+    res.status(200).send("Pomodoro Template deleted successfully.");
   } catch (err) {
-    logger.error("Error deleting Pomodoro session type:", err);
+    logger.error("Error deleting Pomodoro Template:", err);
     res
       .status(500)
-      .send("Failed to delete Pomodoro session type. Please try again later.");
+      .send("Failed to delete Pomodoro Template. Please try again later.");
   }
 };
 
 export {
-  createPomodoroSessionType,
+  createPomodoroTemplate,
   getPomodoroTemplates,
-  updatePomodoroSessionType,
-  deletePomodoroSessionType,
+  updatePomodoroTemplate,
+  deletePomodoroTemplate,
 };

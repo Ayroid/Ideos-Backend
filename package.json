@@ -41,7 +41,7 @@
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.4"
   },
   "config": {
     "commitizen": {
@@ -53,6 +53,7 @@
     "@logger": "src/logger",
     "@routes": "src/routes",
     "@models": "src/models",
-    "@types": "types"
+    "@types": "types",
+    "@data": "src/data"
   }
 }

@@ -2,6 +2,7 @@ import mongoose, { Document, model, Schema } from "mongoose";
 
 export interface IPomodoroTemplates extends Document {
   userId: mongoose.Types.ObjectId;
+  pomodoroSettingsId: mongoose.Types.ObjectId;
   templateName: string;
   pomodoroDuration: number;
   shortBreakDuration: number;
@@ -13,6 +14,11 @@ const PomodoroTemplatesSchema: Schema<IPomodoroTemplates> = new Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "users",
+      required: true,
+    },
+    pomodoroSettingsId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "pomodoroSettings",
       required: true,
     },
     templateName: {
@@ -38,6 +44,6 @@ const PomodoroTemplatesSchema: Schema<IPomodoroTemplates> = new Schema(
 );
 
 export const pomodoroTemplatesModel = model<IPomodoroTemplates>(
-  "pomodoroTemplates",
+  "pomodorotemplates",
   PomodoroTemplatesSchema
 );

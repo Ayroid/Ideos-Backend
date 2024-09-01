@@ -17,4 +17,12 @@ interface AuthenticatedRequest extends Request {
   user?: UserInfo;
 }
 
-export { AuthenticatedRequest };
+type PomodoroData = {
+  templateName: string;
+  pomodoroDuration: number;
+  shortBreakDuration: number;
+  longBreakDuration: number;
+  sessionsBeforeLongBreak: number;
+};
+
+export { AuthenticatedRequest, PomodoroData };

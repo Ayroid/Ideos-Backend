@@ -1,9 +1,15 @@
 import { Response } from "express";
-import { pomodoroSettingsModel, usersModel } from "@models";
+import {
+  pomodoroSettingsModel,
+  pomodoroTemplatesModel,
+  usersModel,
+} from "@models";
 import { AuthenticatedRequest } from "@types";
 import logger from "@logger";
+import { pomodoroData } from "@data";
+import mongoose from "mongoose";
 
-const createPomodoroSessionSettings = async (
+const createPomodoroSettings = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
@@ -24,20 +30,91 @@ const createPomodoroSessionSettings = async (
       return;
     }
 
-    const sessionSettingsData = new pomodoroSettingsModel({
+    if (user.pomodoroSettingsId) {
+      logger.info("User already has Pomodoro settings.");
+      res.status(200).json({
+        pomodoroSetup: true,
+      });
+      return;
+    }
+
+    const pomodoroSettingsData = new pomodoroSettingsModel({
       userId: user._id,
     });
 
-    const sessionSettingsCreated = await sessionSettingsData.save();
+    const pomodoroSettingsCreated = await pomodoroSettingsData.save();
 
-    if (!sessionSettingsCreated) {
+    if (!pomodoroSettingsCreated) {
       logger.error("Failed to create Pomodoro session settings.");
       res.status(500).send("Failed to create Pomodoro session settings.");
       return;
     }
 
+    const createdTemplateIds: mongoose.Types.ObjectId[] = [];
+    let createdActiveTemplateId = new mongoose.Types.ObjectId();
+
+    for (const template of pomodoroData) {
+      const pomodoroTemplateData = {
+        userId: user._id,
+        pomodoroSettingsId: pomodoroSettingsCreated._id,
+        templateName: template.templateName,
+        pomodoroDuration: template.pomodoroDuration,
+        shortBreakDuration: template.shortBreakDuration,
+        longBreakDuration: template.longBreakDuration,
+      };
+
+      const savedTemplate = await new pomodoroTemplatesModel(
+        pomodoroTemplateData
+      ).save();
+
+      if (!savedTemplate) {
+        logger.error("Failed to create Pomodoro Template.");
+        res.status(500).send("Failed to create Pomodoro Template.");
+        return;
+      }
+
+      console.log("Template Saved - ", savedTemplate._id);
+
+      const savedTemplateId = savedTemplate._id as mongoose.Types.ObjectId;
+      createdTemplateIds.push(savedTemplateId);
+
+      if (template.templateName === "Default") {
+        createdActiveTemplateId = savedTemplateId;
+      }
+    }
+
+    console.log("Created Template Ids - ", createdTemplateIds);
+
+    const pomodoroSettingsUpdated =
+      await pomodoroSettingsModel.findByIdAndUpdate(
+        pomodoroSettingsCreated._id,
+        {
+          activePomodoroTemplateId: createdActiveTemplateId,
+          pomodoroTemplateIds: createdTemplateIds,
+        },
+        { new: true }
+      );
+
+    if (!pomodoroSettingsUpdated) {
+      logger.error("Failed to update Pomodoro session settings.");
+      res.status(500).send("Failed to update Pomodoro session settings.");
+      return;
+    }
+
+    const userUpdated = await usersModel.findByIdAndUpdate(user._id, {
+      pomodoroSettingsId: pomodoroSettingsCreated._id,
+    });
+
+    if (!userUpdated) {
+      logger.error("Failed to update user with Pomodoro settings.");
+      res.status(500).send("Failed to update user with Pomodoro settings.");
+      return;
+    }
+
     logger.info("Pomodoro session settings created successfully.");
-    res.status(201).send("Pomodoro session settings created successfully.");
+    res.status(201).json({
+      pomodoroSetup: true,
+    });
   } catch (err) {
     logger.error("Error creating Pomodoro session settings:", err);
     res
@@ -48,7 +125,7 @@ const createPomodoroSessionSettings = async (
   }
 };
 
-const getPomodoroSessionSettings = async (
+const getPomodoroSettings = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
@@ -69,18 +146,20 @@ const getPomodoroSessionSettings = async (
       return;
     }
 
-    const sessionSettings = await pomodoroSettingsModel
+    const pomodoroSettings = await pomodoroSettingsModel
       .find({ userId: user._id })
-      .populate("pomodoroTemplates");
+      .populate({
+        path: "userPomodoroTemplateIds",
+      });
 
-    if (!sessionSettings || sessionSettings.length === 0) {
+    if (!pomodoroSettings || pomodoroSettings.length === 0) {
       logger.error("Pomodoro session settings not found.");
       res.status(404).send("Pomodoro session settings not found.");
       return;
     }
 
     logger.info("Sending fetched Pomodoro session settings");
-    res.status(200).send(sessionSettings);
+    res.status(200).send(pomodoroSettings);
   } catch (err) {
     logger.error("Error getting Pomodoro session settings:", err);
     res
@@ -89,7 +168,7 @@ const getPomodoroSessionSettings = async (
   }
 };
 
-const updatePomodoroSessionSettings = async (
+const updatePomodoroSettings = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
@@ -100,27 +179,27 @@ const updatePomodoroSessionSettings = async (
       alarmTone,
       fontType,
       activePomodoroTemplateId,
-      pomodoroTemplates,
+      userPomodoroTemplateIds,
     } = req.body;
 
-    const sessionSettings = await pomodoroSettingsModel.findById(id);
+    const pomodoroSettings = await pomodoroSettingsModel.findById(id);
 
-    if (!sessionSettings) {
+    if (!pomodoroSettings) {
       logger.error("Pomodoro session settings not found.");
       res.status(404).send("Pomodoro session settings not found.");
       return;
     }
 
-    sessionSettings.wallpaper = wallpaper || sessionSettings.wallpaper;
-    sessionSettings.alarmTone = alarmTone || sessionSettings.alarmTone;
-    sessionSettings.fontType = fontType || sessionSettings.fontType;
-    sessionSettings.activePomodoroTemplateId =
-      activePomodoroTemplateId || sessionSettings.activePomodoroTemplateId;
-    sessionSettings.pomodoroTemplates =
-      pomodoroTemplates || sessionSettings.pomodoroTemplates;
-    const sessionSettingsUpdated = await sessionSettings.save();
+    pomodoroSettings.wallpaper = wallpaper || pomodoroSettings.wallpaper;
+    pomodoroSettings.alarmTone = alarmTone || pomodoroSettings.alarmTone;
+    pomodoroSettings.fontType = fontType || pomodoroSettings.fontType;
+    pomodoroSettings.activePomodoroTemplateId =
+      activePomodoroTemplateId || pomodoroSettings.activePomodoroTemplateId;
+    pomodoroSettings.userPomodoroTemplateIds =
+      userPomodoroTemplateIds || pomodoroSettings.userPomodoroTemplateIds;
+    const pomodoroSettingsUpdated = await pomodoroSettings.save();
 
-    if (!sessionSettingsUpdated) {
+    if (!pomodoroSettingsUpdated) {
       logger.error("Failed to update Pomodoro session settings.");
       res.status(500).send("Failed to update Pomodoro session settings.");
       return;
@@ -138,17 +217,17 @@ const updatePomodoroSessionSettings = async (
   }
 };
 
-const deletePomodoroSessionSettings = async (
+const deletePomodoroSettings = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
   try {
     const { id } = req.params;
 
-    const sessionSettingsDeleted =
+    const pomodoroSettingsDeleted =
       await pomodoroSettingsModel.findByIdAndDelete(id);
 
-    if (!sessionSettingsDeleted) {
+    if (!pomodoroSettingsDeleted) {
       logger.error("Failed to delete Pomodoro session settings.");
       res.status(500).send("Failed to delete Pomodoro session settings.");
       return;
@@ -167,8 +246,8 @@ const deletePomodoroSessionSettings = async (
 };
 
 export {
-  createPomodoroSessionSettings,
-  getPomodoroSessionSettings,
-  updatePomodoroSessionSettings,
-  deletePomodoroSessionSettings,
+  createPomodoroSettings,
+  getPomodoroSettings,
+  updatePomodoroSettings,
+  deletePomodoroSettings,
 };
