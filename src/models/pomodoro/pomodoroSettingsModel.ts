@@ -5,7 +5,7 @@ export interface IPomodoroSessionSettings extends Document {
   wallpaper: string;
   alarmTone: string;
   fontType: string;
-  pomodoroSessionTypes: mongoose.Types.ObjectId[];
+  pomodoroTemplates: mongoose.Types.ObjectId[];
 }
 
 const PomodoroSettingsSchema: Schema<IPomodoroSessionSettings> = new Schema(
@@ -30,9 +30,9 @@ const PomodoroSettingsSchema: Schema<IPomodoroSessionSettings> = new Schema(
       required: true,
       default: "Arial",
     },
-    pomodoroSessionTypes: {
+    pomodoroTemplates: {
       type: [mongoose.Schema.Types.ObjectId],
-      ref: "pomodoroSessionTypes",
+      ref: "pomodoroTemplates",
       default: [],
     },
   },

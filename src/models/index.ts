@@ -6,9 +6,9 @@ import {
   pomodoroSessionModel,
 } from "./pomodoro/pomodoroModel";
 import {
-  IPomodoroSessionTypes,
-  pomodoroSessionTypesModel,
-} from "./pomodoro/pomodoroSessionTypesModel";
+  IPomodoroTemplates,
+  pomodoroTemplatesModel,
+} from "./pomodoro/pomodoroTemplatesModel";
 import {
   IPomodoroSessionSettings,
   pomodoroSettingsModel,
@@ -22,8 +22,8 @@ export {
   todoColumnModel,
   IPomodoroSession,
   pomodoroSessionModel,
-  IPomodoroSessionTypes,
-  pomodoroSessionTypesModel,
+  IPomodoroTemplates,
+  pomodoroTemplatesModel,
   IPomodoroSessionSettings,
   pomodoroSettingsModel,
 };

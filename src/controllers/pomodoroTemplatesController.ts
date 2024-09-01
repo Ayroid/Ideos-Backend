@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { pomodoroSessionTypesModel, usersModel } from "@models";
+import { pomodoroTemplatesModel, usersModel } from "@models";
 import { AuthenticatedRequest } from "@types";
 import logger from "@logger";
 
@@ -44,7 +44,7 @@ const createPomodoroSessionType = async (
       return;
     }
 
-    const sessionTypeData = new pomodoroSessionTypesModel({
+    const sessionTypeData = new pomodoroTemplatesModel({
       userId: user._id,
       sessionName,
       pomodoroDuration,
@@ -70,7 +70,7 @@ const createPomodoroSessionType = async (
   }
 };
 
-const getPomodoroSessionTypes = async (
+const getPomodoroTemplates = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
@@ -91,18 +91,18 @@ const getPomodoroSessionTypes = async (
       return;
     }
 
-    const sessionTypes = await pomodoroSessionTypesModel.find({
+    const Templates = await pomodoroTemplatesModel.find({
       userId: user._id,
     });
 
-    if (!sessionTypes || sessionTypes.length === 0) {
+    if (!Templates || Templates.length === 0) {
       logger.error("Pomodoro session types not found.");
       res.status(404).send("Pomodoro session types not found.");
       return;
     }
 
     logger.info("Sending fetched Pomodoro session types");
-    res.status(200).send(sessionTypes);
+    res.status(200).send(Templates);
   } catch (err) {
     logger.error("Error getting Pomodoro session types:", err);
     res
@@ -124,7 +124,7 @@ const updatePomodoroSessionType = async (
       longBreakDuration,
     } = req.body;
 
-    const sessionType = await pomodoroSessionTypesModel.findById(id);
+    const sessionType = await pomodoroTemplatesModel.findById(id);
 
     if (!sessionType) {
       logger.error("Pomodoro session type not found.");
@@ -165,8 +165,9 @@ const deletePomodoroSessionType = async (
   try {
     const { id } = req.params;
 
-    const sessionTypeDeleted =
-      await pomodoroSessionTypesModel.findByIdAndDelete(id);
+    const sessionTypeDeleted = await pomodoroTemplatesModel.findByIdAndDelete(
+      id
+    );
 
     if (!sessionTypeDeleted) {
       logger.error("Failed to delete Pomodoro session type.");
@@ -186,7 +187,7 @@ const deletePomodoroSessionType = async (
 
 export {
   createPomodoroSessionType,
-  getPomodoroSessionTypes,
+  getPomodoroTemplates,
   updatePomodoroSessionType,
   deletePomodoroSessionType,
 };

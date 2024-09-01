@@ -30,7 +30,7 @@ const PomodoroSessionSchema: Schema<IPomodoroSession> = new Schema(
     },
     sessionTypeId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "pomodoroSessionTypes",
+      ref: "pomodoroTemplates",
       required: true,
     },
     sessionCount: {

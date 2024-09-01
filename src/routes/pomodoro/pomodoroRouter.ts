@@ -9,11 +9,11 @@ import {
 } from "@controllers/pomodoroController";
 
 import {
-  getPomodoroSessionTypes,
+  getPomodoroTemplates,
   createPomodoroSessionType,
   updatePomodoroSessionType,
   deletePomodoroSessionType,
-} from "@controllers/pomodoroSessionTypesController";
+} from "@controllers/pomodoroTemplatesController";
 
 const pomodoroRouter: Router = Router();
 
@@ -26,7 +26,7 @@ pomodoroRouter
 
 pomodoroRouter
   .route("/sessions")
-  .get(getPomodoroSessionTypes)
+  .get(getPomodoroTemplates)
   .post(createPomodoroSessionType);
 pomodoroRouter
   .route("/sessions/:id")
