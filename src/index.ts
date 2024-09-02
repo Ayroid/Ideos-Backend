@@ -10,15 +10,10 @@ const {
   GrantType,
 } = require("@kinde-oss/kinde-node-express");
 
-import { AuthenticatedRequest } from "@types";
-import { Database } from "@controllers/connectDatabase";
-import logger from "@logger";
-import {
-  todosRouter,
-  usersRouter,
-  todoColumnsRouter,
-  pomodoroRouter,
-} from "@routes";
+import { AuthenticatedRequest } from "../types";
+import { Database } from "./controllers/connectDatabase";
+import logger from "./logger";
+import { todosRouter, usersRouter, todoColumnsRouter } from "./routes";
 
 dotenv.config();
 
@@ -51,7 +46,7 @@ app.use("/images", express.static("public/images"));
 
 app.get("/test", (req, res) => {
   logger.info("Test Route");
-  res.send("Application is running.");
+  res.send("Application updated.");
 });
 
 app.get(

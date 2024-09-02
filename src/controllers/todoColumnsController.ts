@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 import { Response } from "express";
-import { AuthenticatedRequest } from "@types";
-import logger from "@logger";
-import { todoColumnModel, usersModel, todosModel } from "@models";
+import { AuthenticatedRequest } from "../../types";
+import logger from "../logger";
+import { todoColumnModel, usersModel, todosModel } from "../models";
 
 dotenv.config();
 
