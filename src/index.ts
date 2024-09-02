@@ -46,7 +46,7 @@ app.use("/images", express.static("public/images"));
 
 app.get("/test", (req, res) => {
   logger.info("Test Route");
-  res.send("Application is running.");
+  res.send("Application updated.");
 });
 
 app.get(
