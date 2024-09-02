@@ -147,12 +147,12 @@ const getPomodoroSettings = async (
     }
 
     const pomodoroSettings = await pomodoroSettingsModel
-      .find({ userId: user._id })
+      .findOne({ userId: user._id })
       .populate({
         path: "userPomodoroTemplateIds",
       });
 
-    if (!pomodoroSettings || pomodoroSettings.length === 0) {
+    if (!pomodoroSettings) {
       logger.error("Pomodoro session settings not found.");
       res.status(404).send("Pomodoro session settings not found.");
       return;
@@ -245,9 +245,57 @@ const deletePomodoroSettings = async (
   }
 };
 
+const setActivePomodoroTemplate = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const userInfo = req.user;
+
+    if (!userInfo) {
+      logger.error("Unauthorized Access");
+      res.status(400).send("Unauthorized Access");
+      return;
+    }
+
+    const user = await usersModel.findOne({ authId: userInfo.id });
+
+    if (!user) {
+      logger.error("Unauthorized Access");
+      res.status(409).send("Unauthorized Access");
+      return;
+    }
+
+    console.log(req.body);
+    // console.log("Template ID - ", template_id);
+
+    // const pomodoroSettingsUpdated =
+    //   await pomodoroSettingsModel.findOneAndUpdate(
+    //     { userId: user._id },
+    //     { activePomodoroTemplateId: template_id },
+    //     { new: true }
+    //   );
+
+    // if (!pomodoroSettingsUpdated) {
+    //   logger.error("Pomodoro session settings not found.");
+    //   res.status(404).send("Pomodoro session settings not found.");
+    //   return;
+    // }
+
+    logger.info("Active Pomodoro Template set successfully.");
+    res.status(200).send("Active Pomodoro Template set successfully.");
+  } catch (err) {
+    logger.error("Error setting Active Pomodoro Template:", err);
+    res
+      .status(500)
+      .send("Failed to set Active Pomodoro Template. Please try again later.");
+  }
+};
+
 export {
   createPomodoroSettings,
   getPomodoroSettings,
   updatePomodoroSettings,
   deletePomodoroSettings,
+  setActivePomodoroTemplate,
 };

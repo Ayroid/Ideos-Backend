@@ -20,6 +20,7 @@ import {
   getPomodoroSettings,
   updatePomodoroSettings,
   deletePomodoroSettings,
+  setActivePomodoroTemplate,
 } from "@controllers/pomodoroSettingsController";
 
 const pomodoroRouter: Router = Router();
@@ -37,6 +38,10 @@ pomodoroRouter
   .route("/settings")
   .get(getPomodoroSettings)
   .post(createPomodoroSettings);
+
+pomodoroRouter
+  .route("/settings/activeTemplate")
+  .post(setActivePomodoroTemplate);
 
 pomodoroRouter
   .route("/settings/:id")
