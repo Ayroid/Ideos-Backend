@@ -3,7 +3,7 @@ name: Build and Deploy CiCD pipeline for backend
 on:
   push:
     branches:
-      - main
+      - master
 jobs:
   build:
     runs-on: ubuntu-latest
