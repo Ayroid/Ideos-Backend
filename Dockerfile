@@ -16,8 +16,8 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/src/public ./src/public
 
-# Copy the .env file
-COPY .env .env
+# # Copy the .env file
+# COPY .env .env
 
 EXPOSE 5000
 CMD ["node", "dist/src/index.js"]
