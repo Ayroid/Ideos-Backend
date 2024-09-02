@@ -10,10 +10,10 @@ const {
   GrantType,
 } = require("@kinde-oss/kinde-node-express");
 
-import { AuthenticatedRequest } from "@types";
-import { Database } from "@controllers/connectDatabase";
-import logger from "@logger";
-import { todosRouter, usersRouter, todoColumnsRouter } from "@routes";
+import { AuthenticatedRequest } from "../types";
+import { Database } from "./controllers/connectDatabase";
+import logger from "./logger";
+import { todosRouter, usersRouter, todoColumnsRouter } from "./routes";
 
 dotenv.config();
 

@@ -5,7 +5,7 @@ import {
   createTodoColumns,
   updateTodosColumn,
   deleteTodosColumn,
-} from "@controllers/todoColumnsController";
+} from "../../controllers/todoColumnsController";
 
 const todoColumnsRouter: Router = Router();
 

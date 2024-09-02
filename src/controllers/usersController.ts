@@ -1,8 +1,8 @@
 import { Response } from "express";
-import { usersModel } from "@models";
+import { usersModel } from "../models";
 import dotenv from "dotenv";
-import { AuthenticatedRequest } from "@types";
-import logger from "@logger";
+import { AuthenticatedRequest } from "../../types";
+import logger from "../logger";
 dotenv.config();
 
 const createUser = async (

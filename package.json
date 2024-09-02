@@ -47,12 +47,5 @@
     "commitizen": {
       "path": "cz-conventional-changelog"
     }
-  },
-  "_moduleAliases": {
-    "@controllers": "src/controllers",
-    "@logger": "src/logger",
-    "@routes": "src/routes",
-    "@models": "src/models",
-    "@types": "types"
   }
 }
