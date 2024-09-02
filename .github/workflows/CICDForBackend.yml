@@ -1,0 +1,61 @@
+---
+name: Build and Deploy CiCD pipeline for backend
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: ideosapp/ideosbackend:latest
+      - name: Deploy to EC2 instance
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            IMAGE_NAME="ideosapp/ideosbackend:latest"
+            PORT=5000
+
+            # Stop and remove the existing container
+            EXISTING_CONTAINER=$(docker ps -q --filter "name=ideosbackend")
+            if [ ! -z "$EXISTING_CONTAINER" ]; then
+                echo "Stopping and removing existing container..."
+                docker stop $EXISTING_CONTAINER
+                docker rm $EXISTING_CONTAINER
+            else
+                echo "No existing container found."
+            fi
+
+            # Remove the existing image
+            echo "Removing Docker image ${IMAGE_NAME}..."
+            docker rmi ${IMAGE_NAME} || true
+
+            # Pull the latest image
+            echo "Pulling Docker image ${IMAGE_NAME}..."
+            docker pull ${IMAGE_NAME}
+
+            # Run the container in detached mode
+            echo "Running Docker container ${IMAGE_NAME} on port ${PORT}..."
+            docker run -d -p ${PORT}:${PORT} --name ideosbackend ${IMAGE_NAME}
+
+            # Check if the container is running
+            if [ "$(docker ps -q -f name=ideosbackend)" ]; then
+                echo "Container is running successfully."
+            else
+                echo "Failed to start the container."
+            fi
