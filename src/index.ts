@@ -13,7 +13,7 @@ const {
 import { AuthenticatedRequest } from "@types";
 import { Database } from "@controllers/connectDatabase";
 import logger from "@logger";
-import { todosRouter, usersRouter, todoColumnsRouter } from "@routes";
+import { todosRouter, usersRouter, todoColumnsRouter, workspaceRouter } from "@routes";
 
 dotenv.config();
 
@@ -68,6 +68,7 @@ app.get(
 app.use("/users", protectRoute, getUser, usersRouter);
 app.use("/todoColumns", protectRoute, getUser, todoColumnsRouter);
 app.use("/todos", protectRoute, getUser, todosRouter);
+app.use("/workspace", protectRoute, getUser, workspaceRouter);
 
 process.on("SIGINT", () => {
   database
