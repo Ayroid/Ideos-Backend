@@ -32,8 +32,20 @@ const createPomodoroSettings = async (
 
     if (user.pomodoroSettingsId) {
       logger.info("User already has Pomodoro settings.");
+
+      const pomodoroSettings = await pomodoroSettingsModel.findOne({
+        userId: user._id,
+      });
+
+      if (!pomodoroSettings) {
+        logger.error("Pomodoro session settings not found.");
+        res.status(404).send("Pomodoro session settings not found.");
+        return;
+      }
+
       res.status(200).json({
-        pomodoroSetup: true,
+        userPomodoroTemplateIds: pomodoroSettings.userPomodoroTemplateIds,
+        activePomodoroTemplateId: pomodoroSettings.activePomodoroTemplateId,
       });
       return;
     }
@@ -90,7 +102,7 @@ const createPomodoroSettings = async (
         pomodoroSettingsCreated._id,
         {
           activePomodoroTemplateId: createdActiveTemplateId,
-          pomodoroTemplateIds: createdTemplateIds,
+          userPomodoroTemplateIds: createdTemplateIds,
         },
         { new: true }
       );
@@ -113,7 +125,8 @@ const createPomodoroSettings = async (
 
     logger.info("Pomodoro session settings created successfully.");
     res.status(201).json({
-      pomodoroSetup: true,
+      userPomodoroTemplateIds: createdTemplateIds,
+      activePomodoroTemplateId: createdActiveTemplateId,
     });
   } catch (err) {
     logger.error("Error creating Pomodoro session settings:", err);
@@ -266,21 +279,20 @@ const setActivePomodoroTemplate = async (
       return;
     }
 
-    console.log(req.body);
-    // console.log("Template ID - ", template_id);
+    const template_id = req.body.template_id;
 
-    // const pomodoroSettingsUpdated =
-    //   await pomodoroSettingsModel.findOneAndUpdate(
-    //     { userId: user._id },
-    //     { activePomodoroTemplateId: template_id },
-    //     { new: true }
-    //   );
+    const pomodoroSettingsUpdated =
+      await pomodoroSettingsModel.findOneAndUpdate(
+        { userId: user._id },
+        { activePomodoroTemplateId: template_id },
+        { new: true }
+      );
 
-    // if (!pomodoroSettingsUpdated) {
-    //   logger.error("Pomodoro session settings not found.");
-    //   res.status(404).send("Pomodoro session settings not found.");
-    //   return;
-    // }
+    if (!pomodoroSettingsUpdated) {
+      logger.error("Pomodoro session settings not found.");
+      res.status(404).send("Pomodoro session settings not found.");
+      return;
+    }
 
     logger.info("Active Pomodoro Template set successfully.");
     res.status(200).send("Active Pomodoro Template set successfully.");

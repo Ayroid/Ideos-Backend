@@ -13,7 +13,12 @@ const {
 import { AuthenticatedRequest } from "../types";
 import { Database } from "./controllers/connectDatabase";
 import logger from "./logger";
-import { todosRouter, usersRouter, todoColumnsRouter, pomodoroRouter } from "./routes";
+import {
+  todosRouter,
+  usersRouter,
+  todoColumnsRouter,
+  pomodoroRouter,
+} from "./routes";
 
 dotenv.config();
 
