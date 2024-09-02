@@ -3,10 +3,10 @@ import {
   pomodoroSettingsModel,
   pomodoroTemplatesModel,
   usersModel,
-} from "@models";
-import { AuthenticatedRequest } from "@types";
-import logger from "@logger";
-import { pomodoroData } from "@data";
+} from "../models";
+import { AuthenticatedRequest } from "../../types";
+import logger from "../logger";
+import { pomodoroData } from "../data";
 import mongoose from "mongoose";
 
 const createPomodoroSettings = async (

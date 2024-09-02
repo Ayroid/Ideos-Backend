@@ -1,4 +1,4 @@
-import type { PomodoroData } from "@types";
+import type { PomodoroData } from "../../types";
 
 const pomodoroData: PomodoroData[] = [
   {

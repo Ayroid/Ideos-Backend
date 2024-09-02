@@ -1,7 +1,7 @@
 import { Response } from "express";
-import { pomodoroTemplatesModel, usersModel } from "@models";
-import { AuthenticatedRequest } from "@types";
-import logger from "@logger";
+import { pomodoroTemplatesModel, usersModel } from "../models";
+import { AuthenticatedRequest } from "../../types";
+import logger from "../logger";
 
 const createPomodoroTemplate = async (
   req: AuthenticatedRequest,

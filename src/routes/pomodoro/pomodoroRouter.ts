@@ -6,14 +6,14 @@ import {
   createPomodoroSession,
   updatePomodoroSession,
   deletePomodoroSession,
-} from "@controllers/pomodoroController";
+} from "../../controllers/pomodoroController";
 
 import {
   getPomodoroTemplates,
   createPomodoroTemplate,
   updatePomodoroTemplate,
   deletePomodoroTemplate,
-} from "@controllers/pomodoroTemplatesController";
+} from "../../controllers/pomodoroTemplatesController";
 
 import {
   createPomodoroSettings,
@@ -21,7 +21,7 @@ import {
   updatePomodoroSettings,
   deletePomodoroSettings,
   setActivePomodoroTemplate,
-} from "@controllers/pomodoroSettingsController";
+} from "../../controllers/pomodoroSettingsController";
 
 const pomodoroRouter: Router = Router();
 
