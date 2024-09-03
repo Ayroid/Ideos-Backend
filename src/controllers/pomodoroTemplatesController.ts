@@ -1,7 +1,12 @@
 import { Response } from "express";
-import { pomodoroTemplatesModel, usersModel } from "../models";
 import { AuthenticatedRequest } from "../../types";
 import logger from "../logger";
+import {
+  pomodoroSettingsModel,
+  pomodoroTemplatesModel,
+  usersModel,
+} from "../models";
+import mongoose from "mongoose";
 
 const createPomodoroTemplate = async (
   req: AuthenticatedRequest,
@@ -9,17 +14,19 @@ const createPomodoroTemplate = async (
 ): Promise<void> => {
   try {
     const {
-      sessionName,
+      templateName,
       pomodoroDuration,
       shortBreakDuration,
       longBreakDuration,
+      sessionsBeforeLongBreak,
     } = req.body;
 
     if (
-      !sessionName ||
+      !templateName ||
       !pomodoroDuration ||
       !shortBreakDuration ||
-      !longBreakDuration
+      !longBreakDuration ||
+      !sessionsBeforeLongBreak
     ) {
       logger.error(
         "Error Creating Pomodoro Template: All fields are required."
@@ -46,24 +53,53 @@ const createPomodoroTemplate = async (
       return;
     }
 
-    const sessionTypeData = new pomodoroTemplatesModel({
+    const pomodoroSettings = await pomodoroSettingsModel.findById(
+      user.pomodoroSettingsId
+    );
+
+    if (!pomodoroSettings) {
+      logger.error("Pomodoro Template does not exist.");
+      res.status(404).send("Pomodoro Template does not exist.");
+      return;
+    }
+
+    const pomodoroTemplateData = new pomodoroTemplatesModel({
       userId: user._id,
-      sessionName,
+      pomodoroSettingsId: pomodoroSettings._id,
+      templateName,
       pomodoroDuration,
       shortBreakDuration,
       longBreakDuration,
+      sessionsBeforeLongBreak,
     });
 
-    const sessionTypeCreated = await sessionTypeData.save();
+    const pomodoroTemplateCreated = await pomodoroTemplateData.save();
 
-    if (!sessionTypeCreated) {
+    if (!pomodoroTemplateCreated) {
       logger.error("Failed to create Pomodoro Template.");
       res.status(500).send("Failed to create Pomodoro Template.");
       return;
     }
 
+    pomodoroSettings.userPomodoroTemplateIds.push(
+      pomodoroTemplateCreated._id as mongoose.Types.ObjectId
+    );
+
+    const pomodoroSettingsUpdated = await pomodoroSettings.save();
+
+    if (!pomodoroSettingsUpdated) {
+      await pomodoroTemplatesModel.findByIdAndDelete(
+        pomodoroTemplateCreated._id
+      );
+      logger.error("Failed to update Pomodoro Settings.");
+      res.status(500).send("Failed to update Pomodoro Settings.");
+      return;
+    }
+
     logger.info("Pomodoro Template created successfully.");
-    res.status(201).send("Pomodoro Template created successfully.");
+    res.status(201).json({
+      _id: pomodoroTemplateCreated._id,
+    });
   } catch (err) {
     logger.error("Error creating Pomodoro Template:", err);
     res
@@ -124,27 +160,33 @@ const updatePomodoroTemplate = async (
       pomodoroDuration,
       shortBreakDuration,
       longBreakDuration,
+      sessionsBeforeLongBreak,
     } = req.body;
 
-    const sessionType = await pomodoroTemplatesModel.findById(id);
+    console.log(id);
 
-    if (!sessionType) {
+    const pomodoroTemplate = await pomodoroTemplatesModel.findById(id);
+
+    if (!pomodoroTemplate) {
       logger.error("Pomodoro Template not found.");
       res.status(404).send("Pomodoro Template not found.");
       return;
     }
 
-    sessionType.templateName = templateName || sessionType.templateName;
-    sessionType.pomodoroDuration =
-      pomodoroDuration || sessionType.pomodoroDuration;
-    sessionType.shortBreakDuration =
-      shortBreakDuration || sessionType.shortBreakDuration;
-    sessionType.longBreakDuration =
-      longBreakDuration || sessionType.longBreakDuration;
+    pomodoroTemplate.templateName =
+      templateName || pomodoroTemplate.templateName;
+    pomodoroTemplate.pomodoroDuration =
+      pomodoroDuration || pomodoroTemplate.pomodoroDuration;
+    pomodoroTemplate.shortBreakDuration =
+      shortBreakDuration || pomodoroTemplate.shortBreakDuration;
+    pomodoroTemplate.longBreakDuration =
+      longBreakDuration || pomodoroTemplate.longBreakDuration;
+    pomodoroTemplate.sessionsBeforeLongBreak =
+      sessionsBeforeLongBreak || pomodoroTemplate.sessionsBeforeLongBreak;
 
-    const sessionTypeUpdated = await sessionType.save();
+    const pomodoroTemplateUpdated = await pomodoroTemplate.save();
 
-    if (!sessionTypeUpdated) {
+    if (!pomodoroTemplateUpdated) {
       logger.error("Failed to update Pomodoro Template.");
       res.status(500).send("Failed to update Pomodoro Template.");
       return;
@@ -167,17 +209,46 @@ const deletePomodoroTemplate = async (
   try {
     const { id } = req.params;
 
-    const sessionTypeDeleted = await pomodoroTemplatesModel.findByIdAndDelete(
-      id
-    );
+    const pomodoroTemplateDeleted =
+      await pomodoroTemplatesModel.findByIdAndDelete(id);
 
-    if (!sessionTypeDeleted) {
-      logger.error("Failed to delete Pomodoro Template.");
-      res.status(500).send("Failed to delete Pomodoro Template.");
+    if (!pomodoroTemplateDeleted) {
+      logger.error(`Pomodoro Template with ID ${id} not found.`);
+      res.status(404).send("Pomodoro Template not found.");
       return;
     }
 
-    logger.info("Pomodoro Template deleted successfully.");
+    // IF POMODORO TEMPLATE IS DELETED, REMOVE IT FROM POMODORO SETTINGS
+
+    const pomodoroSettingsId = pomodoroTemplateDeleted.pomodoroSettingsId;
+
+    const pomodoroSettings = await pomodoroSettingsModel.findById(
+      pomodoroSettingsId
+    );
+
+    if (!pomodoroSettings) {
+      logger.error("Pomodoro Settings not found.");
+      res.status(404).send("Pomodoro Settings not found.");
+      return;
+    }
+
+    const index = pomodoroSettings.userPomodoroTemplateIds.indexOf(
+      pomodoroTemplateDeleted._id as mongoose.Types.ObjectId
+    );
+
+    if (index > -1) {
+      pomodoroSettings.userPomodoroTemplateIds.splice(index, 1);
+    }
+
+    const pomodoroSettingsUpdated = await pomodoroSettings.save();
+
+    if (!pomodoroSettingsUpdated) {
+      logger.error("Failed to update Pomodoro Settings.");
+      res.status(500).send("Failed to update Pomodoro Settings.");
+      return;
+    }
+
+    logger.info(`Pomodoro Template with ID ${id} deleted successfully.`);
     res.status(200).send("Pomodoro Template deleted successfully.");
   } catch (err) {
     logger.error("Error deleting Pomodoro Template:", err);
@@ -189,7 +260,7 @@ const deletePomodoroTemplate = async (
 
 export {
   createPomodoroTemplate,
+  deletePomodoroTemplate,
   getPomodoroTemplates,
   updatePomodoroTemplate,
-  deletePomodoroTemplate,
 };

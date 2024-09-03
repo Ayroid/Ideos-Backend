@@ -7,6 +7,7 @@ export interface IPomodoroTemplates extends Document {
   pomodoroDuration: number;
   shortBreakDuration: number;
   longBreakDuration: number;
+  sessionsBeforeLongBreak: number;
 }
 
 const PomodoroTemplatesSchema: Schema<IPomodoroTemplates> = new Schema(
@@ -34,6 +35,10 @@ const PomodoroTemplatesSchema: Schema<IPomodoroTemplates> = new Schema(
       required: true,
     },
     longBreakDuration: {
+      type: Number,
+      required: true,
+    },
+    sessionsBeforeLongBreak: {
       type: Number,
       required: true,
     },

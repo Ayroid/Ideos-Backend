@@ -26,11 +26,11 @@ import {
 const pomodoroRouter: Router = Router();
 
 pomodoroRouter
-  .route("/sessions")
+  .route("/templates")
   .get(getPomodoroTemplates)
   .post(createPomodoroTemplate);
 pomodoroRouter
-  .route("/sessions/:id")
+  .route("/templates/:id")
   .put(updatePomodoroTemplate)
   .delete(deletePomodoroTemplate);
 

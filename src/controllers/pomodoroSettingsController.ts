@@ -73,6 +73,7 @@ const createPomodoroSettings = async (
         pomodoroDuration: template.pomodoroDuration,
         shortBreakDuration: template.shortBreakDuration,
         longBreakDuration: template.longBreakDuration,
+        sessionsBeforeLongBreak: template.sessionsBeforeLongBreak,
       };
 
       const savedTemplate = await new pomodoroTemplatesModel(
