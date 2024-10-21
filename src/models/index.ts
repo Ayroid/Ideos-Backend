@@ -13,12 +13,11 @@ import {
   IPomodoroSessionSettings,
   pomodoroSessionSettingsModel,
 } from "./pomodoro/pomodoroSettingsModel";
-import { workspaceModel }
+import { WorkspaceModel }
   from "./notetaking/workspaceModel"
 
 import { folderModel } from "./notetaking/folderModel";
 import { fileModel } from "./notetaking/fileModel";
-import { collaboratorModel } from "./notetaking/collaboratorModel";
 
 
 export {
@@ -34,8 +33,7 @@ export {
   pomodoroSessionTypesModel,
   IPomodoroSessionSettings,
   pomodoroSessionSettingsModel,
-  workspaceModel,
+  WorkspaceModel,
   folderModel,
   fileModel,
-  collaboratorModel,
 };

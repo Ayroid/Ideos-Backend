@@ -1,62 +1,43 @@
 import mongoose, { Document, Schema, model } from "mongoose";
 
-// Interface for the Workspace model
-export interface IWorkspace extends Document {
-  userId: mongoose.Types.ObjectId;  // Corresponds to "workspaceOwner" in your payload
-  title: string;  // Corresponds to "title" in your payload
-  iconId: string;
-  bannerUrl: string;
+interface WorkspaceDocument extends Document {
+  userId: mongoose.Types.ObjectId;
+  title: string;
   logo: string | null;
-  inTrash: boolean;
-  folders: string[];
-  data: any;  // To handle any data type, including null
+  description: string;
+  theme: string;
   createdAt: Date;
 }
 
-// Workspace Schema definition
-const workspaceSchema: Schema<IWorkspace> = new Schema(
-  {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "users",
-      required: true,
-    },
-    title: {
-      type: String,
-      required: true,
-    },
-    iconId: {
-      type: String,
-      required: true,
-    },
-    bannerUrl: {
-      type: String,
-      default: "",
-    },
-    logo: {
-      type: String,
-      default: null,
-    },
-    inTrash: {
-      type: Boolean,
-      default: false,
-    },
-    folders: {
-      type: [String],
-      default: [],
-    },
-    data: {
-      type: Schema.Types.Mixed,  // Allows any data type, including null
-      default: null,
-    },
+const workspaceSchema = new Schema<WorkspaceDocument>({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "users",
+    required: true,
   },
-  {
-    timestamps: {
-      createdAt: true,  // Ensures the createdAt field is set automatically
-      updatedAt: false, // Prevents automatic creation of updatedAt field
-    },
-  }
-);
 
-// Creating and exporting the Workspace model
-export const workspaceModel = model<IWorkspace>("workspaces", workspaceSchema);
+  title: {
+    type: String,
+    required: true,
+  },
+  logo: {
+    type: String,
+    default: null,
+  },
+  description: {
+    type: String,
+  },
+  theme: {
+    type: String,
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+export const WorkspaceModel = model<WorkspaceDocument>(
+  "Workspace",
+  workspaceSchema
+);
