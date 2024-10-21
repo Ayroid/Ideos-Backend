@@ -5,44 +5,46 @@ export interface IPomodoroSessionSettings extends Document {
   wallpaper: string;
   alarmTone: string;
   fontType: string;
-  pomodoroSessionTypes: mongoose.Types.ObjectId[];
+  activePomodoroTemplateId: mongoose.Types.ObjectId;
+  userPomodoroTemplateIds: mongoose.Types.ObjectId[];
 }
 
-const PomodoroSessionSettingsSchema: Schema<IPomodoroSessionSettings> =
-  new Schema(
-    {
-      userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "users",
-        required: true,
-      },
-      wallpaper: {
-        type: String,
-        required: true,
-        // TODO: Add default ideos wallpaper
-      },
-      alarmTone: {
-        type: String,
-        required: true,
-        // TODO: Add default alarm tone
-      },
-      fontType: {
-        type: String,
-        required: true,
-        default: "Arial",
-      },
-      pomodoroSessionTypes: {
-        type: [mongoose.Schema.Types.ObjectId],
-        ref: "pomodoroSessionTypes",
-        default: [],
-      },
+const PomodoroSettingsSchema: Schema<IPomodoroSessionSettings> = new Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "users",
+      required: true,
     },
-    {
-      timestamps: true,
-    }
-  );
+    wallpaper: {
+      type: String,
+      // TODO: Add default ideos wallpaper
+    },
+    alarmTone: {
+      type: String,
+      // TODO: Add default alarm tone
+    },
+    fontType: {
+      type: String,
+      default: "Arial",
+    },
+    activePomodoroTemplateId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "pomodorotemplates",
+      default: null,
+    },
+    userPomodoroTemplateIds: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "pomodorotemplates",
+      default: [],
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-export const pomodoroSessionSettingsModel = model<IPomodoroSessionSettings>(
-  "pomodoroSessionSettings",
-  PomodoroSessionSettingsSchema
+export const pomodoroSettingsModel = model<IPomodoroSessionSettings>(
+  "pomodorosettings",
+  PomodoroSettingsSchema
 );

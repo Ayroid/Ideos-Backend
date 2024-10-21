@@ -8,6 +8,7 @@ export interface IUser extends Document {
   firstName?: string;
   lastName?: string;
   emailVerified: boolean;
+  pomodoroSettingsId: mongoose.Types.ObjectId;
 }
 
 const UserSchema: Schema<IUser> = new Schema(
@@ -35,6 +36,11 @@ const UserSchema: Schema<IUser> = new Schema(
     emailVerified: {
       type: Boolean,
       default: false,
+    },
+    pomodoroSettingsId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "pomodorosettings",
+      default: null,
     },
   },
   { timestamps: true }

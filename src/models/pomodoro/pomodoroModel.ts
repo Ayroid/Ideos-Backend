@@ -18,7 +18,6 @@ const PomodoroSessionSchema: Schema<IPomodoroSession> = new Schema(
     },
     totalTime: {
       type: Number,
-      required: true,
       default: 0,
     },
     startTime: {
@@ -28,16 +27,14 @@ const PomodoroSessionSchema: Schema<IPomodoroSession> = new Schema(
     },
     endTime: {
       type: Date,
-      required: true,
     },
     sessionTypeId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "pomodoroSessionTypes",
+      ref: "pomodorotemplates",
       required: true,
     },
     sessionCount: {
       type: Number,
-      required: true,
       default: 0,
     },
   },
@@ -47,6 +44,6 @@ const PomodoroSessionSchema: Schema<IPomodoroSession> = new Schema(
 );
 
 export const pomodoroSessionModel = model<IPomodoroSession>(
-  "pomodoroSessions",
+  "pomodorosessions",
   PomodoroSessionSchema
 );

@@ -96,7 +96,7 @@ const createTodo = async (
     }
 
     const todoData = new todosModel({
-      userId: user?._id,
+      userId: user._id,
       uniqueId,
       columnId,
       title,

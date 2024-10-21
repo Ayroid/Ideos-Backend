@@ -31,21 +31,24 @@ const createUser = async (
     const existingUser = await usersModel.findOne({ authId: userInfo.id });
     if (existingUser) {
       logger.info("User already exists");
-      res.status(200).send("User already exists");
+      res.status(200).json({
+        pomodoroSetup: existingUser.pomodoroSettingsId !== null,
+      });
       return;
-    } else {
-      const newUser = new usersModel(userData);
-      const userCreated = await newUser.save();
-
-      if (!userCreated) {
-        logger.error("Failed to create user.");
-        res.status(500).send("Failed to create user.");
-        return;
-      }
-
-      logger.info("User Created");
-      res.status(201).send("User created successfully.");
     }
+    const newUser = new usersModel(userData);
+    const userCreated = await newUser.save();
+
+    if (!userCreated) {
+      logger.error("Failed to create user.");
+      res.status(500).send("Failed to create user.");
+      return;
+    }
+
+    logger.info("User Created");
+    res.status(201).json({
+      pomodoroSetup: false,
+    });
   } catch (err) {
     logger.error("Error creating user:", err);
     res.status(500).send("Failed to create user. Please try again later.");
