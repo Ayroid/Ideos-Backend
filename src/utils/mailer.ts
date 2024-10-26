@@ -4,6 +4,7 @@ import { todosModel } from "../models/todosModel";
 import { usersModel } from "../models/usersModel";
 import logger from "../../src/logger";
 
+// Configure Nodemailer transporter
 const transporter = nodemailer.createTransport({
   service: "gmail",
   secure: true,
@@ -14,26 +15,31 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-async function sendReminderEmail(userEmail: string) {
+// Function to send a reminder email
+async function sendReminderEmail(firstName: string, userEmail: string) {
   const mailOptions = {
     from: "anket1260@gmail.com",
     to: userEmail,
     subject: "Todo Reminder",
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #000; background-color: #ffffff; color: #000;">
-        <h1 style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px;">Todo Reminder</h1>
-        <p style="font-size: 16px; line-height: 1.5;">
-          Hello,
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff; color: #111827; border-radius: 8px; border: 1px solid #e5e7eb;">
+        <h1 style="text-align: left; font-size: 24px; font-weight: bold; color: #111827; margin-bottom: 10px;">Ideos Alert!</h1>
+        <h2 style="font-size: 20px; color: #374151; margin-bottom: 20px;">Todo Reminder</h2>
+        <p style="font-size: 16px; line-height: 1.6; color: #111827;">
+          Hi ${firstName || "there"},
         </p>
-        <p style="font-size: 16px; line-height: 1.5;">
+        <p style="font-size: 16px; line-height: 1.6; color: #374151;">
           This is a reminder that your todo is due tomorrow. Please make sure to complete it on time.
         </p>
-        <p style="font-size: 16px; line-height: 1.5;">
-          Best regards,<br />
-          Your Task Manager
+        <p style="font-size: 16px; line-height: 1.6; color: #111827;">
+          Thanks for choosing Ideos!
+        </p>
+        <p style="font-size: 16px; color: #111827; font-weight: bold;">
+          Regards,<br />
+          Team Ideos
         </p>
         <div style="text-align: center; margin-top: 20px;">
-          <a href="https://ideos.live/" style="padding: 10px 20px; background-color: #000; color: #fff; text-decoration: none; font-weight: bold;">View Todo</a>
+          <a href="https://ideos.live/" style="padding: 10px 20px; background-color: #111827; color: #ffffff; text-decoration: none; font-weight: bold; border-radius: 6px; border: 1px solid #111827;">View Todo</a>
         </div>
       </div>
     `,
@@ -68,13 +74,17 @@ async function checkTodos() {
     const users = await usersModel.find({ _id: { $in: userIds } });
 
     const userEmailMap = new Map(
-      users.map((user) => [(user._id as string).toString(), user.email])
+      users.map((user) => [
+        (user._id as string).toString(),
+        { email: user.email, firstName: user.firstName || "there" },
+      ])
     );
 
     for (const todo of todos) {
-      const userEmail = userEmailMap.get(todo.userId.toString());
-      if (userEmail) {
-        await sendReminderEmail(userEmail);
+      const userData = userEmailMap.get(todo.userId.toString());
+      if (userData) {
+        const { email: userEmail, firstName } = userData;
+        await sendReminderEmail(firstName, userEmail);
       }
     }
   } catch (error) {
