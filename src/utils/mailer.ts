@@ -10,15 +10,15 @@ const transporter = nodemailer.createTransport({
   secure: true,
   port: 465,
   auth: {
-    user: "anket1260@gmail.com",
-    pass: "dazgqovribhljeyx",
+    user: "process.env.EMAIL_USER",
+    pass: "process.env.EMAIL_PASS",
   },
 });
 
 // Function to send a reminder email
 async function sendReminderEmail(firstName: string, userEmail: string) {
   const mailOptions = {
-    from: "anket1260@gmail.com",
+    from: "process.env.EMAIL_USER",
     to: userEmail,
     subject: "Todo Reminder",
     html: `
