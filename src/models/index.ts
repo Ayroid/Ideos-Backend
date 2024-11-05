@@ -16,8 +16,8 @@ import {
 import { WorkspaceModel }
   from "./notetaking/workspaceModel"
 
-import { folderModel } from "./notetaking/folderModel";
-import { fileModel } from "./notetaking/fileModel";
+import { FolderModel } from "./notetaking/folderModel";
+import { NoteModel } from "./notetaking/noteModel";
 
 
 export {
@@ -34,6 +34,6 @@ export {
   IPomodoroSessionSettings,
   pomodoroSettingsModel,
   WorkspaceModel,
-  folderModel,
-  fileModel,
+  FolderModel,
+  NoteModel,
 };
