@@ -188,6 +188,111 @@ const getAllNotes = async (
   }
 };
 
+const getNotesByWorkspace = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const { workspaceId } = req.params;
+
+    // Check if the workspace exists
+    const workspace = await WorkspaceModel.findById(workspaceId).populate({
+      path: "folders",
+      populate: { path: "notes" }
+    });
+    if (!workspace) {
+      logger.error("Workspace not found.");
+      res.status(404).send("Workspace not found.");
+      return;
+    }
+
+    // Collect all notes across folders within the workspace
+    const notes = workspace.folders.flatMap((folder: any) => folder.notes);
+
+    // Instead of sending a 404 error, send an empty array if there are no notes
+    if (!notes.length) {
+      logger.info("No notes found for this workspace.");
+      res.status(200).json([]);  // Return an empty array
+      return;
+    }
+
+    res.status(200).json(notes);
+  } catch (err) {
+    logger.error("Error retrieving notes for workspace:", err);
+    res.status(500).send("Failed to retrieve notes. Please try again later.");
+  }
+};
+
+
+const moveNote = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const { noteId } = req.params; // Get the noteId from the URL parameters
+    const { folderId } = req.body; // Get the new folderId from the request body
+
+    const userInfo = req.user;
+    if (!userInfo) {
+      logger.error("Unauthorized Access");
+      res.status(400).send("Unauthorized Access");
+      return;
+    }
+
+    const user = await usersModel.findOne({ authId: userInfo.id });
+    if (!user) {
+      logger.error("Unauthorized Access");
+      res.status(409).send("Unauthorized Access");
+      return;
+    }
+
+    // Find the existing note to check its current folderId
+    const existingNote = await NoteModel.findById(noteId);
+    if (!existingNote) {
+      logger.error("Note not found.");
+      res.status(404).send("Note not found.");
+      return;
+    }
+
+    // Check if the folderId has changed, if not no need to update
+    if (existingNote.folderId && existingNote.folderId.toString() === folderId) {
+      logger.info("Note is already in the target folder.");
+      res.status(200).json(existingNote); // Return the existing note if folder ID is the same
+      return;
+    }
+
+    // Step 1: Remove the note ID from the old folder
+    if (existingNote.folderId) {
+      await FolderModel.findByIdAndUpdate(existingNote.folderId, {
+        $pull: { notes: noteId },
+      });
+    }
+
+    // Step 2: Update the note with the new folderId
+    const updatedNote = await NoteModel.findByIdAndUpdate(
+      noteId,
+      { folderId },
+      { new: true }
+    );
+    if (!updatedNote) {
+      logger.error("Error updating the note with new folder.");
+      res.status(500).send("Failed to update note.");
+      return;
+    }
+
+    // Step 3: Add the note ID to the new folder
+    await FolderModel.findByIdAndUpdate(folderId, {
+      $push: { notes: noteId },
+    });
+
+    logger.info("Note moved successfully.");
+    res.status(200).json(updatedNote);
+  } catch (err) {
+    logger.error("Error moving note:", err);
+    res.status(500).send("Failed to move note. Please try again later.");
+  }
+};
+
 export {
   createNote,
   getNoteById,
@@ -195,4 +300,7 @@ export {
   updateNote,
   deleteNote,
   getAllNotes,
+  getNotesByWorkspace,
+  moveNote
 };
+

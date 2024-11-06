@@ -6,7 +6,7 @@ interface WorkspaceDocument extends Document {
   description: string;
   theme: string;
   createdAt: Date;
-  folders: mongoose.Types.ObjectId[]; // Array of folder IDs
+  folders: mongoose.Types.ObjectId[]; 
 }
 
 const workspaceSchema = new Schema<WorkspaceDocument>({

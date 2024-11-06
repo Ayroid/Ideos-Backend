@@ -197,6 +197,38 @@ const removeNoteFromFolder = async (
   }
 };
 
+const getFoldersByWorkspace = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const { workspaceId } = req.params;
+
+    // Check if the workspace exists
+    const workspace = await WorkspaceModel.findById(workspaceId);
+    if (!workspace) {
+      logger.error("Workspace not found.");
+      res.status(404).send("Workspace not found.");
+      return;
+    }
+
+    // Fetch folders associated with the specified workspace
+    const folders = await FolderModel.find({ _id: { $in: workspace.folders } }).populate("notes");
+
+    if (!folders.length) {
+      logger.info("No folders found for this workspace.");
+      res.status(404).send("No folders found for this workspace.");
+      return;
+    }
+
+    res.status(200).json(folders);
+  } catch (err) {
+    logger.error("Error retrieving folders for workspace:", err);
+    res.status(500).send("Failed to retrieve folders. Please try again later.");
+  }
+};
+
+
 export {
   createFolder,
   getFolderById,
@@ -205,4 +237,5 @@ export {
   deleteFolder,
   addNoteToFolder,
   removeNoteFromFolder,
+  getFoldersByWorkspace
 };

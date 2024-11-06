@@ -121,7 +121,7 @@ const createWorkspace = async (
     }
 
     logger.info("Workspace created successfully.");
-    res.status(201).send(workspaceCreated);
+    res.status(201).send(workspaceCreated._id)  ;
   } catch (err) {
     logger.error("Error creating workspace:", err);
     res.status(500).send("Failed to create workspace. Please try again later.");
