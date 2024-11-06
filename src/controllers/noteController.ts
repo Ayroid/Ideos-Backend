@@ -198,7 +198,7 @@ const getNotesByWorkspace = async (
     // Check if the workspace exists
     const workspace = await WorkspaceModel.findById(workspaceId).populate({
       path: "folders",
-      populate: { path: "notes" }
+      populate: { path: "notes" },
     });
     if (!workspace) {
       logger.error("Workspace not found.");
@@ -212,7 +212,7 @@ const getNotesByWorkspace = async (
     // Instead of sending a 404 error, send an empty array if there are no notes
     if (!notes.length) {
       logger.info("No notes found for this workspace.");
-      res.status(200).json([]);  // Return an empty array
+      res.status(200).json([]); // Return an empty array
       return;
     }
 
@@ -222,7 +222,6 @@ const getNotesByWorkspace = async (
     res.status(500).send("Failed to retrieve notes. Please try again later.");
   }
 };
-
 
 const moveNote = async (
   req: AuthenticatedRequest,
@@ -255,7 +254,10 @@ const moveNote = async (
     }
 
     // Check if the folderId has changed, if not no need to update
-    if (existingNote.folderId && existingNote.folderId.toString() === folderId) {
+    if (
+      existingNote.folderId &&
+      existingNote.folderId.toString() === folderId
+    ) {
       logger.info("Note is already in the target folder.");
       res.status(200).json(existingNote); // Return the existing note if folder ID is the same
       return;
@@ -301,6 +303,5 @@ export {
   deleteNote,
   getAllNotes,
   getNotesByWorkspace,
-  moveNote
+  moveNote,
 };
-

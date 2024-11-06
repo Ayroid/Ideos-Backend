@@ -7,7 +7,7 @@ import {
   deleteNote,
   getAllNotes,
   getNotesByWorkspace,
-  moveNote
+  moveNote,
 } from "../../controllers/noteController";
 
 const noteRouter: Router = Router();
@@ -28,6 +28,5 @@ noteRouter.route("/folder/:folderId").get(getNotesByFolderId);
 noteRouter.route("/workspace/:workspaceId").get(getNotesByWorkspace);
 
 noteRouter.route("/move/:noteId").put(moveNote);
-
 
 export { noteRouter };
