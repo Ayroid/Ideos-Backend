@@ -21,6 +21,7 @@ import {
   updatePomodoroSettings,
   deletePomodoroSettings,
   setActivePomodoroTemplate,
+  setActivePomodoroTheme,
 } from "../../controllers/pomodoroSettingsController";
 
 const pomodoroRouter: Router = Router();
@@ -42,6 +43,10 @@ pomodoroRouter
 pomodoroRouter
   .route("/settings/activeTemplate")
   .post(setActivePomodoroTemplate);
+
+pomodoroRouter
+  .route("/settings/activeTheme")
+  .post(setActivePomodoroTheme);
 
 pomodoroRouter
   .route("/settings/:id")
