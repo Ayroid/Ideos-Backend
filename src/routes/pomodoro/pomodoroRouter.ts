@@ -6,14 +6,14 @@ import {
   createPomodoroSession,
   updatePomodoroSession,
   deletePomodoroSession,
-} from "../../controllers/pomodoroController";
+} from "../../controllers/pomodoro/pomodoroController";
 
 import {
   getPomodoroTemplates,
   createPomodoroTemplate,
   updatePomodoroTemplate,
   deletePomodoroTemplate,
-} from "../../controllers/pomodoroTemplatesController";
+} from "../../controllers/pomodoro/pomodoroTemplatesController";
 
 import {
   createPomodoroSettings,
@@ -22,7 +22,7 @@ import {
   deletePomodoroSettings,
   setActivePomodoroTemplate,
   setActivePomodoroTheme,
-} from "../../controllers/pomodoroSettingsController";
+} from "../../controllers/pomodoro/pomodoroSettingsController";
 
 const pomodoroRouter: Router = Router();
 
@@ -44,9 +44,7 @@ pomodoroRouter
   .route("/settings/activeTemplate")
   .post(setActivePomodoroTemplate);
 
-pomodoroRouter
-  .route("/settings/activeTheme")
-  .post(setActivePomodoroTheme);
+pomodoroRouter.route("/settings/activeTheme").post(setActivePomodoroTheme);
 
 pomodoroRouter
   .route("/settings/:id")
