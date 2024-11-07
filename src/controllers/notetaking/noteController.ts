@@ -1,9 +1,14 @@
 import dotenv from "dotenv";
 import mongoose, { Document, ObjectId } from "mongoose";
 import { Response } from "express";
-import { usersModel, WorkspaceModel, NoteModel, FolderModel } from "../models";
-import { AuthenticatedRequest } from "../../types";
-import logger from "../logger";
+import {
+  usersModel,
+  WorkspaceModel,
+  NoteModel,
+  FolderModel,
+} from "../../models";
+import { AuthenticatedRequest } from "../../../types";
+import logger from "../../logger";
 
 dotenv.config();
 

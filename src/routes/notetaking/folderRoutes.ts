@@ -8,7 +8,7 @@ import {
   addNoteToFolder,
   removeNoteFromFolder,
   getFoldersByWorkspace,
-} from "../../controllers/folderController";
+} from "../../controllers/notetaking/folderController";
 
 const folderRouter: Router = Router();
 

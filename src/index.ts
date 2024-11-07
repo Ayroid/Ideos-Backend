@@ -11,7 +11,7 @@ const {
 } = require("@kinde-oss/kinde-node-express");
 
 import { AuthenticatedRequest } from "../types";
-import { Database } from "./controllers/connectDatabase";
+import { Database } from "./controllers/database/connectDatabase";
 import logger from "./logger";
 import {
   todosRouter,

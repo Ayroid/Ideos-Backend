@@ -8,7 +8,7 @@ import {
   getAllNotes,
   getNotesByWorkspace,
   moveNote,
-} from "../../controllers/noteController";
+} from "../../controllers/notetaking/noteController";
 
 const noteRouter: Router = Router();
 

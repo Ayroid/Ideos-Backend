@@ -1,9 +1,9 @@
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import { Response } from "express";
-import { todoColumnModel, usersModel, todosModel } from "../models";
-import { AuthenticatedRequest } from "../../types";
-import logger from "../logger";
+import { todoColumnModel, usersModel, todosModel } from "../../models";
+import { AuthenticatedRequest } from "../../../types";
+import logger from "../../logger";
 
 dotenv.config();
 

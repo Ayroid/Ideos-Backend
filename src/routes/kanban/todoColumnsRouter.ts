@@ -5,7 +5,7 @@ import {
   createTodoColumns,
   updateTodosColumn,
   deleteTodosColumn,
-} from "../../controllers/todoColumnsController";
+} from "../../controllers/kanban/todoColumnsController";
 
 const todoColumnsRouter: Router = Router();
 

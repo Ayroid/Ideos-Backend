@@ -7,7 +7,7 @@ import {
   getUsersWorkspaces,
   updateWorkspace,
   deleteWorkspace,
-} from "../../controllers/workspaceController";
+} from "../../controllers/notetaking/workspaceController";
 
 const workspaceRouter: Router = Router();
 

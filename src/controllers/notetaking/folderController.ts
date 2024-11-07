@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
-import { FolderModel, NoteModel, WorkspaceModel } from "../models";
-import { AuthenticatedRequest } from "../../types";
-import logger from "../logger";
+import { FolderModel, NoteModel, WorkspaceModel } from "../../models";
+import { AuthenticatedRequest } from "../../../types";
+import logger from "../../logger";
 
 // Create a new folder and add it to a specific workspace
 const createFolder = async (

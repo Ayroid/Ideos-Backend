@@ -6,7 +6,7 @@ import {
   createTodo,
   updateTodo,
   deleteTodo,
-} from "../../controllers/todosController";
+} from "../../controllers/kanban/todosController";
 
 const todosRouter: Router = Router();
 

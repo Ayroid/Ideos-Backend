@@ -1,5 +1,5 @@
 import mongoose, { ConnectOptions } from "mongoose";
-import logger from "../logger";
+import logger from "../../logger";
 class Database {
   private uri: string;
   private options: ConnectOptions;
