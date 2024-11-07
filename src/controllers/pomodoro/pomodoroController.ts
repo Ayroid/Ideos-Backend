@@ -1,7 +1,7 @@
 import { Response } from "express";
-import { pomodoroSessionModel, usersModel } from "../models";
-import { AuthenticatedRequest } from "../../types";
-import logger from "../logger";
+import { pomodoroSessionModel, usersModel } from "../../models";
+import { AuthenticatedRequest } from "../../../types";
+import logger from "../../logger";
 
 const getPomodoroSessionById = async (
   req: AuthenticatedRequest,

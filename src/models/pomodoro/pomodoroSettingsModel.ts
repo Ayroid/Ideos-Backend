@@ -7,6 +7,7 @@ export interface IPomodoroSessionSettings extends Document {
   fontType: string;
   activePomodoroTemplateId: mongoose.Types.ObjectId;
   userPomodoroTemplateIds: mongoose.Types.ObjectId[];
+  activePomodoroTheme: string;
 }
 
 const PomodoroSettingsSchema: Schema<IPomodoroSessionSettings> = new Schema(
@@ -37,6 +38,10 @@ const PomodoroSettingsSchema: Schema<IPomodoroSessionSettings> = new Schema(
       type: [mongoose.Schema.Types.ObjectId],
       ref: "pomodorotemplates",
       default: [],
+    },
+    activePomodoroTheme: {
+      type: String,
+      default: "/pomodoro/japanese-preview.jpg",
     },
   },
   {

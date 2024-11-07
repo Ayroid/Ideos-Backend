@@ -3,10 +3,10 @@ import {
   pomodoroSettingsModel,
   pomodoroTemplatesModel,
   usersModel,
-} from "../models";
-import { AuthenticatedRequest } from "../../types";
-import logger from "../logger";
-import { pomodoroData } from "../data";
+} from "../../models";
+import { AuthenticatedRequest } from "../../../types";
+import logger from "../../logger";
+import { pomodoroData } from "../../data";
 import mongoose from "mongoose";
 
 const createPomodoroSettings = async (
@@ -33,9 +33,11 @@ const createPomodoroSettings = async (
     if (user.pomodoroSettingsId) {
       logger.info("User already has Pomodoro settings.");
 
-      const pomodoroSettings = await pomodoroSettingsModel.findOne({
-        userId: user._id,
-      });
+      const pomodoroSettings = await pomodoroSettingsModel
+        .findOne({ userId: user._id })
+        .populate({
+          path: "userPomodoroTemplateIds",
+        });
 
       if (!pomodoroSettings) {
         logger.error("Pomodoro session settings not found.");
@@ -43,10 +45,7 @@ const createPomodoroSettings = async (
         return;
       }
 
-      res.status(200).json({
-        userPomodoroTemplateIds: pomodoroSettings.userPomodoroTemplateIds,
-        activePomodoroTemplateId: pomodoroSettings.activePomodoroTemplateId,
-      });
+      res.status(200).send(pomodoroSettings);
       return;
     }
 
@@ -305,10 +304,57 @@ const setActivePomodoroTemplate = async (
   }
 };
 
+const setActivePomodoroTheme = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const userInfo = req.user;
+
+    if (!userInfo) {
+      logger.error("Unauthorized Access");
+      res.status(400).send("Unauthorized Access");
+      return;
+    }
+
+    const user = await usersModel.findOne({ authId: userInfo.id });
+
+    if (!user) {
+      logger.error("Unauthorized Access");
+      res.status(409).send("Unauthorized Access");
+      return;
+    }
+
+    const theme = req.body.theme;
+
+    const pomodoroSettingsUpdated =
+      await pomodoroSettingsModel.findOneAndUpdate(
+        { userId: user._id },
+        { activePomodoroTheme: theme },
+        { new: true }
+      );
+
+    if (!pomodoroSettingsUpdated) {
+      logger.error("Pomodoro session settings not found.");
+      res.status(404).send("Pomodoro session settings not found.");
+      return;
+    }
+
+    logger.info("Active Pomodoro Theme set successfully.");
+    res.status(200).send("Active Pomodoro Template set successfully.");
+  } catch (err) {
+    logger.error("Error setting Active Pomodoro Template:", err);
+    res
+      .status(500)
+      .send("Failed to set Active Pomodoro Template. Please try again later.");
+  }
+};
+
 export {
   createPomodoroSettings,
   getPomodoroSettings,
   updatePomodoroSettings,
   deletePomodoroSettings,
   setActivePomodoroTemplate,
+  setActivePomodoroTheme,
 };
