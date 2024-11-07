@@ -1,11 +1,11 @@
 import { Response } from "express";
-import { AuthenticatedRequest } from "../../types";
-import logger from "../logger";
+import { AuthenticatedRequest } from "../../../types";
+import logger from "../../logger";
 import {
   pomodoroSettingsModel,
   pomodoroTemplatesModel,
   usersModel,
-} from "../models";
+} from "../../models";
 import mongoose from "mongoose";
 
 const createPomodoroTemplate = async (
