@@ -33,9 +33,11 @@ const createPomodoroSettings = async (
     if (user.pomodoroSettingsId) {
       logger.info("User already has Pomodoro settings.");
 
-      const pomodoroSettings = await pomodoroSettingsModel.findOne({
-        userId: user._id,
-      });
+      const pomodoroSettings = await pomodoroSettingsModel
+        .findOne({ userId: user._id })
+        .populate({
+          path: "userPomodoroTemplateIds",
+        });
 
       if (!pomodoroSettings) {
         logger.error("Pomodoro session settings not found.");
@@ -43,10 +45,7 @@ const createPomodoroSettings = async (
         return;
       }
 
-      res.status(200).json({
-        userPomodoroTemplateIds: pomodoroSettings.userPomodoroTemplateIds,
-        activePomodoroTemplateId: pomodoroSettings.activePomodoroTemplateId,
-      });
+      res.status(200).send(pomodoroSettings);
       return;
     }
 
