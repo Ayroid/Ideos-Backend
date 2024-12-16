@@ -22,10 +22,7 @@ const noteSchema = new Schema<NoteDocument>({
     ref: "Folder",
     default: null,
   },
-  isMarkup: {
-    type: Boolean,
-    default: false,
-  },
+
   createdAt: {
     type: Date,
     default: Date.now,

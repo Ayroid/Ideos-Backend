@@ -17,7 +17,7 @@ const createNote = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { title, content, folderId, isMarkup } = req.body;
+    const { title, content, folderId } = req.body;
     const userInfo = req.user;
 
     if (!userInfo) {
@@ -38,7 +38,6 @@ const createNote = async (
       title,
       content,
       folderId,
-      isMarkup,
     });
 
     await newNote.save();
@@ -100,7 +99,7 @@ const updateNote = async (
 ): Promise<void> => {
   try {
     const { noteId } = req.params;
-    const { title, content, folderId, isMarkup } = req.body;
+    const { title, content, folderId} = req.body;
 
     const existingNote = await NoteModel.findById(noteId);
 
@@ -112,7 +111,7 @@ const updateNote = async (
 
     const updatedNote = await NoteModel.findByIdAndUpdate(
       noteId,
-      { title, content, folderId, isMarkup },
+      { title, content, folderId },
       { new: true }
     );
 
