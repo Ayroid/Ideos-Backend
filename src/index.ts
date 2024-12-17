@@ -17,10 +17,8 @@ import {
   todosRouter,
   usersRouter,
   todoColumnsRouter,
-  notebookRouter,
   pomodoroRouter,
-  noteRouter,
-  folderRouter,
+  notetakingRouter,
 } from "./routes";
 
 dotenv.config();
@@ -76,10 +74,9 @@ app.get(
 app.use("/users", protectRoute, getUser, usersRouter);
 app.use("/todoColumns", protectRoute, getUser, todoColumnsRouter);
 app.use("/todos", protectRoute, getUser, todosRouter);
-app.use("/notebook", protectRoute, getUser, notebookRouter);
+
 app.use("/pomodoro", protectRoute, getUser, pomodoroRouter);
-app.use("/note", protectRoute, getUser, noteRouter);
-app.use("/folder", protectRoute, getUser, folderRouter);
+app.use("/notetaking", protectRoute, getUser, notetakingRouter);
 
 process.on("SIGINT", () => {
   database

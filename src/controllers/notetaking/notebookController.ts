@@ -9,67 +9,40 @@ import {
 import { AuthenticatedRequest } from "../../../types";
 import logger from "../../logger";
 
-const createNotebook = async (
+const getUserNotebooks = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
-  const { title, description, workspaceId } = req.body;
-
-  if (!title || !workspaceId) {
-    logger.info(
-      "Error Creating Notebook: Title and workspace ID are required."
-    );
-    res
-      .status(400)
-      .send("Error Creating Notebook: Title and workspace ID are required.");
-    return;
-  }
-
-  const userInfo = req.user;
-
-  if (!userInfo) {
-    logger.error("Unauthorized Access");
-    res.status(400).send("Unauthorized Access");
-    return;
-  }
-
-  const user = await usersModel.findOne({ authId: userInfo.id });
-
-  if (!user) {
-    logger.error("Unauthorized Access");
-    res.status(409).send("Unauthorized Access");
-    return;
-  }
-
-  // Verify workspace exists
-  const workspace = await workspacesModel.findById(workspaceId);
-  if (!workspace) {
-    logger.error("Workspace not found");
-    res.status(404).send("Workspace not found");
-    return;
-  }
-
   try {
-    const newNotebook = new notebooksModel({
-      userId: user._id,
-      workspaceId,
-      title,
-      description,
-    });
+    const userInfo = req.user;
 
-    const notebookCreated = await newNotebook.save();
-
-    if (!notebookCreated) {
-      logger.error("Failed to create notebook.");
-      res.status(500).send("Failed to create notebook.");
+    if (!userInfo) {
+      logger.error("Unauthorized Access");
+      res.status(401).send("Unauthorized Access");
       return;
     }
 
-    logger.info("Notebook created successfully.");
-    res.status(201).send(notebookCreated._id);
+    const user = await usersModel.findOne({ authId: userInfo.id });
+
+    if (!user) {
+      logger.error("User not found");
+      res.status(404).send("User not found");
+      return;
+    }
+
+    const notebook = await notebooksModel.findOne({ userId: user._id });
+
+    if (!notebook) {
+      logger.info("No notebooks found for user.");
+      res.status(200).json([]);
+      return;
+    }
+
+    logger.info(`User Notebook Id ${notebook._id}`);
+    res.status(200).json(notebook);
   } catch (err) {
-    logger.error("Error creating notebook:", err);
-    res.status(500).send("Failed to create notebook. Please try again later.");
+    logger.error("Error fetching user notebooks:", err);
+    res.status(500).send("Failed to fetch notebooks. Please try again later.");
   }
 };
 
@@ -93,6 +66,66 @@ const getNotebookById = async (
   } catch (err) {
     logger.error("Error getting notebook:", err);
     res.status(500).send("Failed to get notebook. Please try again later.");
+  }
+};
+
+const createNotebook = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  const { title, description } = req.body;
+
+  if (!title) {
+    logger.info("Error Creating Notebook: Title is required.");
+    res.status(400).send("Error Creating Notebook: Title is required.");
+    return;
+  }
+
+  const userInfo = req.user;
+
+  if (!userInfo) {
+    logger.error("Unauthorized Access");
+    res.status(401).send("Unauthorized Access");
+    return;
+  }
+
+  const user = await usersModel.findOne({ authId: userInfo.id });
+
+  if (!user) {
+    logger.error("User not found");
+    res.status(404).send("User not found");
+    return;
+  }
+
+  // const userWorkspace = await workspacesModel.findOne({ userId: user._id });
+
+  // if (!userWorkspace) {
+  //   logger.error("Workspace not found");
+  //   res.status(404).send("Workspace not found");
+  //   return;
+  // }
+
+  try {
+    const newNotebook = new notebooksModel({
+      userId: user._id,
+      // workspaceId: userWorkspace._id,
+      title,
+      description,
+    });
+
+    const notebookCreated = await newNotebook.save();
+
+    if (!notebookCreated) {
+      logger.error("Failed to create notebook.");
+      res.status(500).send("Failed to create notebook.");
+      return;
+    }
+
+    logger.info("Notebook created successfully.");
+    res.status(201).json(notebookCreated);
+  } catch (err) {
+    logger.error("Error creating notebook:", err);
+    res.status(500).send("Failed to create notebook. Please try again later.");
   }
 };
 
@@ -149,4 +182,10 @@ const deleteNotebook = async (
   }
 };
 
-export { getNotebookById, createNotebook, updateNotebook, deleteNotebook };
+export {
+  getNotebookById,
+  createNotebook,
+  updateNotebook,
+  deleteNotebook,
+  getUserNotebooks,
+};

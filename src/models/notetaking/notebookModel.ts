@@ -14,11 +14,12 @@ const notebookSchema = new Schema<INotebook>(
       ref: "users",
       required: true,
     },
-    workspaceId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "workspaces",
-      required: true,
-    },
+    // TODO: Uncomment this when workspaces are implemented
+    // workspaceId: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "workspaces",
+    //   required: true,
+    // },
     title: {
       type: String,
       required: true,
