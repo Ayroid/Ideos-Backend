@@ -53,9 +53,9 @@ const createPomodoroTemplate = async (
       return;
     }
 
-    const pomodoroSettings = await pomodoroSettingsModel.findById(
-      user.pomodoroSettingsId
-    );
+    const pomodoroSettings = await pomodoroSettingsModel.findOne({
+      userId: user._id,
+    });
 
     if (!pomodoroSettings) {
       logger.error("Pomodoro Template does not exist.");
@@ -217,8 +217,6 @@ const deletePomodoroTemplate = async (
       res.status(404).send("Pomodoro Template not found.");
       return;
     }
-
-    // IF POMODORO TEMPLATE IS DELETED, REMOVE IT FROM POMODORO SETTINGS
 
     const pomodoroSettingsId = pomodoroTemplateDeleted.pomodoroSettingsId;
 

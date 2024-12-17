@@ -37,11 +37,6 @@ const UserSchema: Schema<IUser> = new Schema(
       type: Boolean,
       default: false,
     },
-    pomodoroSettingsId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "pomodorosettings",
-      default: null,
-    },
   },
   { timestamps: true }
 );

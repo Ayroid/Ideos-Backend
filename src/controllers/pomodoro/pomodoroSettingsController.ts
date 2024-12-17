@@ -30,7 +30,11 @@ const createPomodoroSettings = async (
       return;
     }
 
-    if (user.pomodoroSettingsId) {
+    const userPomodoroSettings = await pomodoroSettingsModel.findOne({
+      userId: user._id,
+    });
+
+    if (userPomodoroSettings) {
       logger.info("User already has Pomodoro settings.");
 
       const pomodoroSettings = await pomodoroSettingsModel
@@ -110,16 +114,6 @@ const createPomodoroSettings = async (
     if (!pomodoroSettingsUpdated) {
       logger.error("Failed to update Pomodoro session settings.");
       res.status(500).send("Failed to update Pomodoro session settings.");
-      return;
-    }
-
-    const userUpdated = await usersModel.findByIdAndUpdate(user._id, {
-      pomodoroSettingsId: pomodoroSettingsCreated._id,
-    });
-
-    if (!userUpdated) {
-      logger.error("Failed to update user with Pomodoro settings.");
-      res.status(500).send("Failed to update user with Pomodoro settings.");
       return;
     }
 
