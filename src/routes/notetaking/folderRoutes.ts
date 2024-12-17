@@ -2,30 +2,17 @@ import { Router } from "express";
 import {
   createFolder,
   getFolderById,
-  getAllFolders,
   updateFolder,
   deleteFolder,
-  addNoteToFolder,
-  removeNoteFromFolder,
-  getFoldersByWorkspace,
+  getFoldersByNotebook,
 } from "../../controllers/notetaking/folderController";
 
 const folderRouter: Router = Router();
 
 folderRouter.route("/").post(createFolder);
-
-folderRouter.route("/").get(getAllFolders);
-
-// folderRouter.route("/:folderId").get(getFolderById);
-
-folderRouter.route("/:folderId").put(updateFolder);
-
-folderRouter.route("/:workspaceId/:folderId").delete(deleteFolder);
-
-folderRouter.route("/:folderId/notes/:noteId").post(addNoteToFolder);
-
-folderRouter.route("/:folderId/notes/:noteId").delete(removeNoteFromFolder);
-
-folderRouter.route("/:workspaceId").get(getFoldersByWorkspace);
+folderRouter.route("/:folderId").get(getFolderById).put(updateFolder);
+folderRouter.route("/:folderId/notes/:noteId");
+folderRouter.route("/:notebookId/:folderId").delete(deleteFolder);
+folderRouter.route("/:notebookId").get(getFoldersByNotebook);
 
 export { folderRouter };

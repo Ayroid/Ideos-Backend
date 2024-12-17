@@ -1,32 +1,22 @@
 import { Router } from "express";
 import {
   createNote,
+  deleteNote,
   getNoteById,
   getNotesByFolderId,
-  updateNote,
-  deleteNote,
-  getAllNotes,
-  getNotesByWorkspace,
+  getNotesByNotebook,
   moveNote,
+  updateNote,
 } from "../../controllers/notetaking/noteController";
 
 const noteRouter: Router = Router();
 
 noteRouter.route("/").post(createNote);
-
-noteRouter.route("/all").get(getAllNotes);
-
-noteRouter.route("/:noteId").get(getNoteById);
-
-noteRouter.route("/:noteId").put(updateNote);
-
-noteRouter.route("/:noteId").delete(deleteNote);
-
-// Route for getting notes by folder ID
 noteRouter.route("/folder/:folderId").get(getNotesByFolderId);
-
-noteRouter.route("/workspace/:workspaceId").get(getNotesByWorkspace);
-
 noteRouter.route("/move/:noteId").put(moveNote);
+noteRouter.route("/:noteId").delete(deleteNote);
+noteRouter.route("/:noteId").get(getNoteById);
+noteRouter.route("/:noteId").put(updateNote);
+noteRouter.route("/notebook/:notebookId").get(getNotesByNotebook);
 
 export { noteRouter };
