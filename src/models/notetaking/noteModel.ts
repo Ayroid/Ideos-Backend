@@ -1,32 +1,36 @@
 import mongoose, { Document, Schema, model } from "mongoose";
 
-interface NoteDocument extends Document {
+interface INote extends Document {
   title: string;
   content: string;
-  folderId: mongoose.Types.ObjectId | null;
-  isMarkup: boolean;
-  createdAt: Date;
+  folderId: mongoose.Types.ObjectId;
+  notebookId: mongoose.Types.ObjectId;
 }
 
-const noteSchema = new Schema<NoteDocument>({
-  title: {
-    type: String,
-    required: true,
+const noteSchema = new Schema<INote>(
+  {
+    title: {
+      type: String,
+      required: true,
+    },
+    content: {
+      type: String,
+      required: true,
+    },
+    folderId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "folders",
+      default: null,
+    },
+    notebookId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "notebooks",
+      required: true,
+    },
   },
-  content: {
-    type: String,
-    required: true,
-  },
-  folderId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Folder",
-    default: null,
-  },
+  {
+    timestamps: true,
+  }
+);
 
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
-
-export const NoteModel = model<NoteDocument>("Note", noteSchema);
+export const notesModel = model<INote>("notes", noteSchema);

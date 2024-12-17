@@ -13,12 +13,12 @@ import {
   IPomodoroSessionSettings,
   pomodoroSettingsModel,
 } from "./pomodoro/pomodoroSettingsModel";
-import { WorkspaceModel }
-  from "./notetaking/workspaceModel"
 
-import { FolderModel } from "./notetaking/folderModel";
-import { NoteModel } from "./notetaking/noteModel";
+import { notebooksModel } from "./notetaking/notebookModel";
+import { foldersModel } from "./notetaking/folderModel";
+import { notesModel } from "./notetaking/noteModel";
 
+import { IWorkspace, workspacesModel } from "./workspace/workspaceModel";
 
 export {
   IUser,
@@ -33,7 +33,9 @@ export {
   pomodoroTemplatesModel,
   IPomodoroSessionSettings,
   pomodoroSettingsModel,
-  WorkspaceModel,
-  FolderModel,
-  NoteModel,
+  notebooksModel,
+  foldersModel,
+  notesModel,
+  IWorkspace,
+  workspacesModel,
 };

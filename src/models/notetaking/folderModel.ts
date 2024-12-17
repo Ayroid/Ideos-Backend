@@ -1,27 +1,23 @@
 import mongoose, { Document, Schema, model } from "mongoose";
 
-interface FolderDocument extends Document {
+interface IFolder extends Document {
   name: string;
-  notes: mongoose.Types.ObjectId[];
-  createdAt: Date;
+  notebookId: mongoose.Types.ObjectId;
 }
 
-const folderSchema = new Schema<FolderDocument>({
-  name: {
-    type: String,
-    required: true,
-  },
-  notes: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Note",
+const folderSchema = new Schema<IFolder>(
+  {
+    name: {
+      type: String,
+      required: true,
     },
-  ],
-
-  createdAt: {
-    type: Date,
-    default: Date.now,
+    notebookId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "notebooks",
+      required: true,
+    },
   },
-});
+  { timestamps: true }
+);
 
-export const FolderModel = model<FolderDocument>("Folder", folderSchema);
+export const foldersModel = model<IFolder>("folders", folderSchema);

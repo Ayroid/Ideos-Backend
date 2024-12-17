@@ -1,20 +1,18 @@
 import { Router } from "express";
-
 import {
-  getWorkspaces,
-  getWorkspaceById,
-  createWorkspace,
-  getUsersWorkspaces,
-  updateWorkspace,
-  deleteWorkspace,
-} from "../../controllers/notetaking/workspaceController";
+  getNotebookById,
+  createNotebook,
+  updateNotebook,
+  deleteNotebook,
+} from "../../controllers/notetaking/notebookController";
 
-const workspaceRouter: Router = Router();
+const notebookRouter: Router = Router();
 
-// Existing routes
-workspaceRouter.route("/").get(getWorkspaces).post(createWorkspace);
-workspaceRouter.route("/:workspaceId").get(getWorkspaceById).put(updateWorkspace);
-workspaceRouter.route("/get/user").get(getUsersWorkspaces).delete(deleteWorkspace);
+notebookRouter.post("/", createNotebook);
+notebookRouter
+  .route("/:notebookId")
+  .get(getNotebookById)
+  .put(updateNotebook)
+  .delete(deleteNotebook);
 
-
-export { workspaceRouter };
+export { notebookRouter };
