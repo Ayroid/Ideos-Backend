@@ -31,9 +31,7 @@ const createUser = async (
     const existingUser = await usersModel.findOne({ authId: userInfo.id });
     if (existingUser) {
       logger.info("User already exists");
-      res.status(200).json({
-        pomodoroSetup: existingUser.pomodoroSettingsId !== null,
-      });
+      res.status(200).json("User already exists");
       return;
     }
     const newUser = new usersModel(userData);
@@ -46,9 +44,7 @@ const createUser = async (
     }
 
     logger.info("User Created");
-    res.status(201).json({
-      pomodoroSetup: false,
-    });
+    res.status(201).json("User Created");
   } catch (err) {
     logger.error("Error creating user:", err);
     res.status(500).send("Failed to create user. Please try again later.");
