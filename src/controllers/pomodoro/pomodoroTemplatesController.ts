@@ -5,6 +5,7 @@ import {
   pomodoroSettingsModel,
   pomodoroTemplatesModel,
   usersModel,
+  workspacesModel,
 } from "../../models";
 import mongoose from "mongoose";
 
@@ -53,8 +54,17 @@ const createPomodoroTemplate = async (
       return;
     }
 
+    const workspace = await workspacesModel.findOne({ userId: user._id });
+
+    if (!workspace) {
+      logger.error("Workspace not found");
+      res.status(404).send("Workspace not found");
+      return;
+    }
+
     const pomodoroSettings = await pomodoroSettingsModel.findOne({
       userId: user._id,
+      workspaceId: workspace._id,
     });
 
     if (!pomodoroSettings) {
@@ -65,6 +75,7 @@ const createPomodoroTemplate = async (
 
     const pomodoroTemplateData = new pomodoroTemplatesModel({
       userId: user._id,
+      workspaceId: workspace._id,
       pomodoroSettingsId: pomodoroSettings._id,
       templateName,
       pomodoroDuration,
@@ -129,8 +140,17 @@ const getPomodoroTemplates = async (
       return;
     }
 
+    const workspace = await workspacesModel.findOne({ userId: user._id });
+
+    if (!workspace) {
+      logger.error("Workspace not found");
+      res.status(404).send("Workspace not found");
+      return;
+    }
+
     const Templates = await pomodoroTemplatesModel.find({
       userId: user._id,
+      workspaceId: workspace._id,
     });
 
     if (!Templates || Templates.length === 0) {
@@ -154,6 +174,30 @@ const updatePomodoroTemplate = async (
   res: Response
 ): Promise<void> => {
   try {
+    const userInfo = req.user;
+
+    if (!userInfo) {
+      logger.error("Unauthorized Access");
+      res.status(400).send("Unauthorized Access");
+      return;
+    }
+
+    const user = await usersModel.findOne({ authId: userInfo.id });
+
+    if (!user) {
+      logger.error("Unauthorized Access");
+      res.status(409).send("Unauthorized Access");
+      return;
+    }
+
+    const workspace = await workspacesModel.findOne({ userId: user._id });
+
+    if (!workspace) {
+      logger.error("Workspace not found");
+      res.status(404).send("Workspace not found");
+      return;
+    }
+
     const { id } = req.params;
     const {
       templateName,
@@ -163,9 +207,11 @@ const updatePomodoroTemplate = async (
       sessionsBeforeLongBreak,
     } = req.body;
 
-    console.log(id);
-
-    const pomodoroTemplate = await pomodoroTemplatesModel.findById(id);
+    const pomodoroTemplate = await pomodoroTemplatesModel.findOne({
+      _id: id,
+      userId: user._id,
+      workspaceId: workspace._id,
+    });
 
     if (!pomodoroTemplate) {
       logger.error("Pomodoro Template not found.");
@@ -207,10 +253,38 @@ const deletePomodoroTemplate = async (
   res: Response
 ): Promise<void> => {
   try {
+    const userInfo = req.user;
+
+    if (!userInfo) {
+      logger.error("Unauthorized Access");
+      res.status(400).send("Unauthorized Access");
+      return;
+    }
+
+    const user = await usersModel.findOne({ authId: userInfo.id });
+
+    if (!user) {
+      logger.error("Unauthorized Access");
+      res.status(409).send("Unauthorized Access");
+      return;
+    }
+
+    const workspace = await workspacesModel.findOne({ userId: user._id });
+
+    if (!workspace) {
+      logger.error("Workspace not found");
+      res.status(404).send("Workspace not found");
+      return;
+    }
+
     const { id } = req.params;
 
     const pomodoroTemplateDeleted =
-      await pomodoroTemplatesModel.findByIdAndDelete(id);
+      await pomodoroTemplatesModel.findOneAndDelete({
+        _id: id,
+        userId: user._id,
+        workspaceId: workspace._id,
+      });
 
     if (!pomodoroTemplateDeleted) {
       logger.error(`Pomodoro Template with ID ${id} not found.`);
@@ -220,9 +294,11 @@ const deletePomodoroTemplate = async (
 
     const pomodoroSettingsId = pomodoroTemplateDeleted.pomodoroSettingsId;
 
-    const pomodoroSettings = await pomodoroSettingsModel.findById(
-      pomodoroSettingsId
-    );
+    const pomodoroSettings = await pomodoroSettingsModel.findOne({
+      _id: pomodoroSettingsId,
+      userId: user._id,
+      workspaceId: workspace._id,
+    });
 
     if (!pomodoroSettings) {
       logger.error("Pomodoro Settings not found.");
