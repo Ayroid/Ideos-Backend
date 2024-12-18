@@ -2,6 +2,7 @@ import mongoose, { Document, Schema, model } from "mongoose";
 
 export interface ITodoColumn extends Document {
   userId: mongoose.Types.ObjectId;
+  workspaceId: mongoose.Types.ObjectId;
   uniqueId: string;
   title: string;
   color: string;
@@ -13,6 +14,11 @@ const todoColumnSchema: Schema<ITodoColumn> = new Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "users",
+      required: true,
+    },
+    workspaceId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "workspaces",
       required: true,
     },
     uniqueId: {
@@ -38,6 +44,9 @@ const todoColumnSchema: Schema<ITodoColumn> = new Schema(
     timestamps: true,
   }
 );
+
+todoColumnSchema.index({ workspaceId: 1, uniqueId: 1 });
+todoColumnSchema.index({ userId: 1, workspaceId: 1 });
 
 export const todoColumnModel = model<ITodoColumn>(
   "todocolumns",

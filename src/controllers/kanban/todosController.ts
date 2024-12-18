@@ -1,237 +1,350 @@
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import { Response } from "express";
-import { todoColumnModel, usersModel, todosModel } from "../../models";
+import { todoColumnModel, usersModel, todosModel, workspacesModel } from "../../models";
 import { AuthenticatedRequest } from "../../../types";
 import logger from "../../logger";
 
 dotenv.config();
 
 const getTodoById = async (
-  req: AuthenticatedRequest,
-  res: Response
+ req: AuthenticatedRequest,
+ res: Response
 ): Promise<void> => {
-  try {
-    const { uniqueId } = req.params;
+ try {
+   const { uniqueId } = req.params;
+   const userInfo = req.user;
 
-    const todo = await todosModel.findOne({ uniqueId });
+   if (!userInfo) {
+     logger.error("Unauthorized Access");
+     res.status(400).send("Unauthorized Access");
+     return;
+   }
 
-    if (!todo) {
-      logger.error("Todo not found.");
-      res.status(404).send("Todo not found.");
-      return;
-    }
-    logger.info("Sending Todo:", todo._id);
-    res.status(200).send(todo);
-  } catch (err) {
-    logger.error("Error getting todo:", err);
-    res.status(500).send("Failed to get todo. Please try again later.");
-  }
+   const user = await usersModel.findOne({ authId: userInfo.id });
+
+   if (!user) {
+     logger.error("Unauthorized Access");
+     res.status(409).send("Unauthorized Access");
+     return;
+   }
+
+   const workspace = await workspacesModel.findOne({ userId: user._id });
+
+   if (!workspace) {
+     logger.error("Workspace not found");
+     res.status(404).send("Workspace not found");
+     return;
+   }
+
+   const todo = await todosModel.findOne({
+     uniqueId,
+     userId: user._id,
+     workspaceId: workspace._id
+   });
+
+   if (!todo) {
+     logger.error("Todo not found.");
+     res.status(404).send("Todo not found.");
+     return;
+   }
+   logger.info("Sending Todo:", todo._id);
+   res.status(200).send(todo);
+ } catch (err) {
+   logger.error("Error getting todo:", err);
+   res.status(500).send("Failed to get todo. Please try again later.");
+ }
 };
 
 const getTodos = async (
-  req: AuthenticatedRequest,
-  res: Response
+ req: AuthenticatedRequest,
+ res: Response
 ): Promise<void> => {
-  try {
-    const userInfo = req.user;
+ try {
+   const userInfo = req.user;
 
-    if (!userInfo) {
-      logger.error("Unauthorized Access");
-      res.status(400).send("Unauthorized Access");
-      return;
-    }
+   if (!userInfo) {
+     logger.error("Unauthorized Access");
+     res.status(400).send("Unauthorized Access");
+     return;
+   }
 
-    const user = await usersModel.findOne({ authId: userInfo.id });
+   const user = await usersModel.findOne({ authId: userInfo.id });
 
-    if (!user) {
-      logger.error("Unauthorized Access");
-      res.status(409).send("Unauthorized Access");
-      return;
-    }
+   if (!user) {
+     logger.error("Unauthorized Access");
+     res.status(409).send("Unauthorized Access");
+     return;
+   }
 
-    const todos = await todosModel.find({ userId: user._id });
+   const workspace = await workspacesModel.findOne({ userId: user._id });
 
-    if (!todos || todos.length === 0) {
-      logger.error("Todos not found.");
-      res.status(404).send("Todos not found.");
-      return;
-    }
+   if (!workspace) {
+     logger.error("Workspace not found");
+     res.status(404).send("Workspace not found");
+     return;
+   }
 
-    logger.info("Sending fetched columns");
-    res.status(200).send(todos);
-  } catch (err) {
-    logger.error("Error getting todos:", err);
-    res.status(500).send("Failed to get todos. Please try again later.");
-  }
+   const todos = await todosModel.find({
+     userId: user._id,
+     workspaceId: workspace._id
+   });
+
+   if (!todos || todos.length === 0) {
+     logger.error("Todos not found.");
+     res.status(404).send("Todos not found.");
+     return;
+   }
+
+   logger.info("Sending fetched columns");
+   res.status(200).send(todos);
+ } catch (err) {
+   logger.error("Error getting todos:", err);
+   res.status(500).send("Failed to get todos. Please try again later.");
+ }
 };
 
 const createTodo = async (
-  req: AuthenticatedRequest,
-  res: Response
+ req: AuthenticatedRequest,
+ res: Response
 ): Promise<void> => {
-  try {
-    const { uniqueId, columnId, title, description, tags, dueDate } = req.body;
+ try {
+   const { uniqueId, columnId, title, description, tags, dueDate } = req.body;
 
-    if (!uniqueId || !columnId || !title || !description || !tags || !dueDate) {
-      logger.info("Error Creating Todo: All fields are required.");
-      res.status(400).send("Error Creating Todo: All fields are required.");
-      return;
-    }
+   if (!uniqueId || !columnId || !title || !description || !tags || !dueDate) {
+     logger.info("Error Creating Todo: All fields are required.");
+     res.status(400).send("Error Creating Todo: All fields are required.");
+     return;
+   }
 
-    const userInfo = req.user;
+   const userInfo = req.user;
 
-    if (!userInfo) {
-      logger.error("Unauthorized Access");
-      res.status(400).send("Unauthorized Access");
-      return;
-    }
+   if (!userInfo) {
+     logger.error("Unauthorized Access");
+     res.status(400).send("Unauthorized Access");
+     return;
+   }
 
-    const user = await usersModel.findOne({ authId: userInfo.id });
+   const user = await usersModel.findOne({ authId: userInfo.id });
 
-    if (!user) {
-      logger.error("Unauthorized Access");
-      res.status(409).send("Unauthorized Access");
-      return;
-    }
+   if (!user) {
+     logger.error("Unauthorized Access");
+     res.status(409).send("Unauthorized Access");
+     return;
+   }
 
-    const todoData = new todosModel({
-      userId: user._id,
-      uniqueId,
-      columnId,
-      title,
-      description,
-      tags,
-      dueDate: new Date(dueDate),
-    });
+   const workspace = await workspacesModel.findOne({ userId: user._id });
 
-    const todoCreated = await todoData.save();
+   if (!workspace) {
+     logger.error("Workspace not found");
+     res.status(404).send("Workspace not found");
+     return;
+   }
 
-    if (!todoCreated) {
-      logger.error("Failed to create todo.");
-      res.status(500).send("Failed to create todo.");
-      return;
-    }
+   const todoData = new todosModel({
+     userId: user._id,
+     workspaceId: workspace._id,
+     uniqueId,
+     columnId,
+     title,
+     description,
+     tags,
+     dueDate: new Date(dueDate),
+   });
 
-    const todoColumn = await todoColumnModel.findOne({ uniqueId: columnId });
+   const todoCreated = await todoData.save();
 
-    if (!todoColumn) {
-      await todosModel.findByIdAndDelete(todoCreated._id);
-      logger.error("Todo column not found.");
-      res.status(404).send("Todo column not found.");
-      return;
-    }
+   if (!todoCreated) {
+     logger.error("Failed to create todo.");
+     res.status(500).send("Failed to create todo.");
+     return;
+   }
 
-    todoColumn.todoIds!.push(todoCreated._id as mongoose.Types.ObjectId);
-    const todoColumnSaved = await todoColumn.save();
+   const todoColumn = await todoColumnModel.findOne({
+     uniqueId: columnId,
+     userId: user._id,
+     workspaceId: workspace._id
+   });
 
-    if (!todoColumnSaved) {
-      await todosModel.findByIdAndDelete(todoCreated._id);
+   if (!todoColumn) {
+     await todosModel.findByIdAndDelete(todoCreated._id);
+     logger.error("Todo column not found.");
+     res.status(404).send("Todo column not found.");
+     return;
+   }
 
-      const todoIndex = todoColumn.todoIds!.indexOf(
-        todoCreated._id as mongoose.Types.ObjectId
-      );
-      if (todoIndex > -1) {
-        todoColumn.todoIds!.splice(todoIndex, 1);
-      }
-      logger.error("Failed to update todo column.");
-      res.status(500).send("Failed to update todo column.");
-      return;
-    }
+   todoColumn.todoIds!.push(todoCreated._id as mongoose.Types.ObjectId);
+   const todoColumnSaved = await todoColumn.save();
 
-    logger.info("Todo created and added to column successfully.");
-    res.status(201).send("Todo created successfully.");
-  } catch (err) {
-    logger.error("Error creating todo:", err);
-    res.status(500).send("Failed to create todo. Please try again later.");
-  }
+   if (!todoColumnSaved) {
+     await todosModel.findByIdAndDelete(todoCreated._id);
+
+     const todoIndex = todoColumn.todoIds!.indexOf(
+       todoCreated._id as mongoose.Types.ObjectId
+     );
+     if (todoIndex > -1) {
+       todoColumn.todoIds!.splice(todoIndex, 1);
+     }
+     logger.error("Failed to update todo column.");
+     res.status(500).send("Failed to update todo column.");
+     return;
+   }
+
+   logger.info("Todo created and added to column successfully.");
+   res.status(201).send("Todo created successfully.");
+ } catch (err) {
+   logger.error("Error creating todo:", err);
+   res.status(500).send("Failed to create todo. Please try again later.");
+ }
 };
 
 const updateTodo = async (
-  req: AuthenticatedRequest,
-  res: Response
+ req: AuthenticatedRequest,
+ res: Response
 ): Promise<void> => {
-  try {
-    const { id } = req.params;
-    const { columnId, title, description, tags, dueDate } = req.body;
+ try {
+   const { id } = req.params;
+   const { columnId, title, description, tags, dueDate } = req.body;
+   const userInfo = req.user;
 
-    const todo = await todosModel.findOne({ uniqueId: id });
+   if (!userInfo) {
+     logger.error("Unauthorized Access");
+     res.status(400).send("Unauthorized Access");
+     return;
+   }
 
-    if (!todo) {
-      logger.error("Todo not found.");
-      res.status(404).send("Todo not found.");
-      return;
-    }
+   const user = await usersModel.findOne({ authId: userInfo.id });
 
-    todo.title = title || todo.title;
-    todo.columnId = columnId || todo.columnId;
-    todo.description = description || todo.description;
-    todo.tags = tags || todo.tags;
-    todo.dueDate = dueDate ? new Date(dueDate) : todo.dueDate;
+   if (!user) {
+     logger.error("Unauthorized Access");
+     res.status(409).send("Unauthorized Access");
+     return;
+   }
 
-    const todoUpdated = await todo.save();
+   const workspace = await workspacesModel.findOne({ userId: user._id });
 
-    if (!todoUpdated) {
-      logger.error("Failed to update todo.");
-      res.status(500).send("Failed to update todo.");
-      return;
-    }
+   if (!workspace) {
+     logger.error("Workspace not found");
+     res.status(404).send("Workspace not found");
+     return;
+   }
 
-    logger.info("Todo updated successfully.");
-    res.status(200).send("Todo updated successfully.");
-  } catch (err) {
-    logger.error("Error updating todo:", err);
-    res.status(500).send("Failed to update todo. Please try again later.");
-  }
+   const todo = await todosModel.findOne({
+     uniqueId: id,
+     userId: user._id,
+     workspaceId: workspace._id
+   });
+
+   if (!todo) {
+     logger.error("Todo not found.");
+     res.status(404).send("Todo not found.");
+     return;
+   }
+
+   todo.title = title || todo.title;
+   todo.columnId = columnId || todo.columnId;
+   todo.description = description || todo.description;
+   todo.tags = tags || todo.tags;
+   todo.dueDate = dueDate ? new Date(dueDate) : todo.dueDate;
+
+   const todoUpdated = await todo.save();
+
+   if (!todoUpdated) {
+     logger.error("Failed to update todo.");
+     res.status(500).send("Failed to update todo.");
+     return;
+   }
+
+   logger.info("Todo updated successfully.");
+   res.status(200).send("Todo updated successfully.");
+ } catch (err) {
+   logger.error("Error updating todo:", err);
+   res.status(500).send("Failed to update todo. Please try again later.");
+ }
 };
 
 const deleteTodo = async (
-  req: AuthenticatedRequest,
-  res: Response
+ req: AuthenticatedRequest,
+ res: Response
 ): Promise<void> => {
-  try {
-    const { id } = req.params;
+ try {
+   const { id } = req.params;
+   const userInfo = req.user;
 
-    const todo = await todosModel.findOne({ uniqueId: id });
+   if (!userInfo) {
+     logger.error("Unauthorized Access");
+     res.status(400).send("Unauthorized Access");
+     return;
+   }
 
-    if (!todo) {
-      logger.error("Todo not found.");
-      res.status(404).send("Todo not found.");
-      return;
-    }
+   const user = await usersModel.findOne({ authId: userInfo.id });
 
-    const todoColumn = await todoColumnModel.findOne({ todoIds: todo._id });
+   if (!user) {
+     logger.error("Unauthorized Access");
+     res.status(409).send("Unauthorized Access");
+     return;
+   }
 
-    if (todoColumn) {
-      const todoIndex = todoColumn.todoIds!.indexOf(
-        todo._id as mongoose.Types.ObjectId
-      );
-      if (todoIndex > -1) {
-        todoColumn.todoIds!.splice(todoIndex, 1);
-        const todoColumnSaved = await todoColumn.save();
+   const workspace = await workspacesModel.findOne({ userId: user._id });
 
-        if (!todoColumnSaved) {
-          logger.error("Failed to update todo column.");
-          res.status(500).send("Failed to update todo column.");
-          return;
-        }
-      }
-    }
+   if (!workspace) {
+     logger.error("Workspace not found");
+     res.status(404).send("Workspace not found");
+     return;
+   }
 
-    const todoDeleted = await todosModel.findOneAndDelete({ uniqueId: id });
+   const todo = await todosModel.findOne({
+     uniqueId: id,
+     userId: user._id,
+     workspaceId: workspace._id
+   });
 
-    if (!todoDeleted) {
-      logger.error("Failed to delete todo.");
-      res.status(500).send("Failed to delete todo.");
-      return;
-    }
+   if (!todo) {
+     logger.error("Todo not found.");
+     res.status(404).send("Todo not found.");
+     return;
+   }
 
-    logger.info("Todo deleted successfully.");
-    res.status(200).send("Todo deleted successfully.");
-  } catch (err) {
-    logger.error("Error deleting todo:", err);
-    res.status(500).send("Failed to delete todo. Please try again later.");
-  }
+   const todoColumn = await todoColumnModel.findOne({
+     todoIds: todo._id,
+     userId: user._id,
+     workspaceId: workspace._id
+   });
+
+   if (todoColumn) {
+     const todoIndex = todoColumn.todoIds!.indexOf(
+       todo._id as mongoose.Types.ObjectId
+     );
+     if (todoIndex > -1) {
+       todoColumn.todoIds!.splice(todoIndex, 1);
+       const todoColumnSaved = await todoColumn.save();
+
+       if (!todoColumnSaved) {
+         logger.error("Failed to update todo column.");
+         res.status(500).send("Failed to update todo column.");
+         return;
+       }
+     }
+   }
+
+   const todoDeleted = await todosModel.findOneAndDelete({
+     uniqueId: id,
+     userId: user._id,
+     workspaceId: workspace._id
+   });
+
+   if (!todoDeleted) {
+     logger.error("Failed to delete todo.");
+     res.status(500).send("Failed to delete todo.");
+     return;
+   }
+
+   logger.info("Todo deleted successfully.");
+   res.status(200).send("Todo deleted successfully.");
+ } catch (err) {
+   logger.error("Error deleting todo:", err);
+   res.status(500).send("Failed to delete todo. Please try again later.");
+ }
 };
 
 export { getTodoById, getTodos, createTodo, deleteTodo, updateTodo };
