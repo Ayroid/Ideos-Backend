@@ -19,6 +19,7 @@ import {
   todoColumnsRouter,
   pomodoroRouter,
   notetakingRouter,
+  workspaceRouter,
 } from "./routes";
 
 dotenv.config();
@@ -77,6 +78,7 @@ app.use("/todos", protectRoute, getUser, todosRouter);
 
 app.use("/pomodoro", protectRoute, getUser, pomodoroRouter);
 app.use("/notetaking", protectRoute, getUser, notetakingRouter);
+app.use("/workspace", protectRoute, getUser, workspaceRouter);
 
 process.on("SIGINT", () => {
   database

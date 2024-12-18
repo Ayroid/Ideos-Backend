@@ -3,6 +3,7 @@ import { todosRouter } from "./kanban/todosRouter";
 import { usersRouter } from "./user/usersRouter";
 import { notetakingRouter } from "./notetaking/notetakingRouter";
 import { pomodoroRouter } from "./pomodoro/pomodoroRouter";
+import {workspaceRouter} from "./workspace/workspaceRouter";
 
 export {
   todoColumnsRouter,
@@ -10,4 +11,5 @@ export {
   usersRouter,
   pomodoroRouter,
   notetakingRouter,
+  workspaceRouter
 };
