@@ -81,21 +81,6 @@ const getNoteById = async (
   }
 };
 
-const getNotesByFolderId = async (
-  req: AuthenticatedRequest,
-  res: Response
-): Promise<void> => {
-  try {
-    const { folderId } = req.params;
-    const notes = await notesModel.find({ folderId });
-
-    res.status(200).json(notes);
-  } catch (err) {
-    logger.error("Error retrieving notes by folder:", err);
-    res.status(500).send("Failed to retrieve notes. Please try again later.");
-  }
-};
-
 const updateNote = async (
   req: AuthenticatedRequest,
   res: Response
@@ -196,7 +181,6 @@ const moveNote = async (
 export {
   createNote,
   getNoteById,
-  getNotesByFolderId,
   getNotesByNotebook,
   updateNote,
   deleteNote,
