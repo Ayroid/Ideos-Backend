@@ -1,15 +1,13 @@
-import { todoColumnsRouter } from "./kanban/todoColumnsRouter";
-import { todosRouter } from "./kanban/todosRouter";
 import { usersRouter } from "./user/usersRouter";
+import { kanbanRouter } from "./kanban/kanbanRouter";
 import { notetakingRouter } from "./notetaking/notetakingRouter";
 import { pomodoroRouter } from "./pomodoro/pomodoroRouter";
-import {workspaceRouter} from "./workspace/workspaceRouter";
+import { workspaceRouter } from "./workspace/workspaceRouter";
 
 export {
-  todoColumnsRouter,
-  todosRouter,
   usersRouter,
+  kanbanRouter,
   pomodoroRouter,
   notetakingRouter,
-  workspaceRouter
+  workspaceRouter,
 };

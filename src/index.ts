@@ -14,9 +14,8 @@ import { AuthenticatedRequest } from "../types";
 import { Database } from "./controllers/database/connectDatabase";
 import logger from "./logger";
 import {
-  todosRouter,
   usersRouter,
-  todoColumnsRouter,
+  kanbanRouter,
   pomodoroRouter,
   notetakingRouter,
   workspaceRouter,
@@ -73,9 +72,8 @@ app.get(
 );
 
 app.use("/users", protectRoute, getUser, usersRouter);
-app.use("/todoColumns", protectRoute, getUser, todoColumnsRouter);
-app.use("/todos", protectRoute, getUser, todosRouter);
 
+app.use("/kanban", protectRoute, getUser, kanbanRouter);
 app.use("/pomodoro", protectRoute, getUser, pomodoroRouter);
 app.use("/notetaking", protectRoute, getUser, notetakingRouter);
 app.use("/workspace", protectRoute, getUser, workspaceRouter);
