@@ -1,6 +1,11 @@
-// folder.controller.ts
 import { Response } from "express";
-import { foldersModel, notesModel, notebooksModel } from "../../models";
+import {
+  foldersModel,
+  notesModel,
+  notebooksModel,
+  usersModel,
+  workspacesModel,
+} from "../../models";
 import { AuthenticatedRequest } from "../../../types";
 import logger from "../../logger";
 
@@ -10,6 +15,13 @@ const createFolder = async (
 ): Promise<void> => {
   try {
     const { name, notebookId } = req.body;
+    const userInfo = req.user;
+
+    if (!userInfo) {
+      logger.error("Unauthorized Access");
+      res.status(400).send("Unauthorized Access");
+      return;
+    }
 
     if (!notebookId) {
       logger.error("Notebook ID is required");
@@ -17,7 +29,28 @@ const createFolder = async (
       return;
     }
 
-    const notebook = await notebooksModel.findById(notebookId);
+    const user = await usersModel.findOne({ authId: userInfo.id });
+
+    if (!user) {
+      logger.error("Unauthorized Access");
+      res.status(409).send("Unauthorized Access");
+      return;
+    }
+
+    const workspace = await workspacesModel.findOne({ userId: user._id });
+
+    if (!workspace) {
+      logger.error("Workspace not found");
+      res.status(404).send("Workspace not found");
+      return;
+    }
+
+    const notebook = await notebooksModel.findOne({
+      _id: notebookId,
+      userId: user._id,
+      workspaceId: workspace._id,
+    });
+
     if (!notebook) {
       logger.error("Notebook not found");
       res.status(404).send("Notebook not found");
@@ -27,6 +60,8 @@ const createFolder = async (
     const newFolder = new foldersModel({
       name,
       notebookId,
+      userId: user._id,
+      workspaceId: workspace._id,
     });
 
     const folderCreated = await newFolder.save();
@@ -45,7 +80,35 @@ const getFolderById = async (
 ): Promise<void> => {
   try {
     const { folderId } = req.params;
-    const folder = await foldersModel.findById(folderId);
+    const userInfo = req.user;
+
+    if (!userInfo) {
+      logger.error("Unauthorized Access");
+      res.status(400).send("Unauthorized Access");
+      return;
+    }
+
+    const user = await usersModel.findOne({ authId: userInfo.id });
+
+    if (!user) {
+      logger.error("Unauthorized Access");
+      res.status(409).send("Unauthorized Access");
+      return;
+    }
+
+    const workspace = await workspacesModel.findOne({ userId: user._id });
+
+    if (!workspace) {
+      logger.error("Workspace not found");
+      res.status(404).send("Workspace not found");
+      return;
+    }
+
+    const folder = await foldersModel.findOne({
+      _id: folderId,
+      userId: user._id,
+      workspaceId: workspace._id,
+    });
 
     if (!folder) {
       logger.error("Folder not found.");
@@ -53,7 +116,11 @@ const getFolderById = async (
       return;
     }
 
-    const notes = await notesModel.find({ folderId });
+    const notes = await notesModel.find({
+      folderId,
+      userId: user._id,
+      workspaceId: workspace._id,
+    });
 
     res.status(200).json({
       ...folder.toObject(),
@@ -71,15 +138,47 @@ const getFoldersByNotebook = async (
 ): Promise<void> => {
   try {
     const { notebookId } = req.params;
+    const userInfo = req.user;
 
-    const notebook = await notebooksModel.findById(notebookId);
+    if (!userInfo) {
+      logger.error("Unauthorized Access");
+      res.status(400).send("Unauthorized Access");
+      return;
+    }
+
+    const user = await usersModel.findOne({ authId: userInfo.id });
+
+    if (!user) {
+      logger.error("Unauthorized Access");
+      res.status(409).send("Unauthorized Access");
+      return;
+    }
+
+    const workspace = await workspacesModel.findOne({ userId: user._id });
+
+    if (!workspace) {
+      logger.error("Workspace not found");
+      res.status(404).send("Workspace not found");
+      return;
+    }
+
+    const notebook = await notebooksModel.findOne({
+      _id: notebookId,
+      userId: user._id,
+      workspaceId: workspace._id,
+    });
+
     if (!notebook) {
       logger.error("Notebook not found.");
       res.status(404).send("Notebook not found.");
       return;
     }
 
-    const folders = await foldersModel.find({ notebookId });
+    const folders = await foldersModel.find({
+      notebookId,
+      userId: user._id,
+      workspaceId: workspace._id,
+    });
 
     if (!folders.length) {
       logger.info("No folders found in this notebook.");
@@ -101,9 +200,36 @@ const updateFolder = async (
   try {
     const { folderId } = req.params;
     const { name } = req.body;
+    const userInfo = req.user;
 
-    const updatedFolder = await foldersModel.findByIdAndUpdate(
-      folderId,
+    if (!userInfo) {
+      logger.error("Unauthorized Access");
+      res.status(400).send("Unauthorized Access");
+      return;
+    }
+
+    const user = await usersModel.findOne({ authId: userInfo.id });
+
+    if (!user) {
+      logger.error("Unauthorized Access");
+      res.status(409).send("Unauthorized Access");
+      return;
+    }
+
+    const workspace = await workspacesModel.findOne({ userId: user._id });
+
+    if (!workspace) {
+      logger.error("Workspace not found");
+      res.status(404).send("Workspace not found");
+      return;
+    }
+
+    const updatedFolder = await foldersModel.findOneAndUpdate(
+      {
+        _id: folderId,
+        userId: user._id,
+        workspaceId: workspace._id,
+      },
       { name },
       { new: true }
     );
@@ -128,8 +254,41 @@ const deleteFolder = async (
 ): Promise<void> => {
   try {
     const { folderId } = req.params;
-    await notesModel.deleteMany({ folderId });
-    const deletedFolder = await foldersModel.findByIdAndDelete(folderId);
+    const userInfo = req.user;
+
+    if (!userInfo) {
+      logger.error("Unauthorized Access");
+      res.status(400).send("Unauthorized Access");
+      return;
+    }
+
+    const user = await usersModel.findOne({ authId: userInfo.id });
+
+    if (!user) {
+      logger.error("Unauthorized Access");
+      res.status(409).send("Unauthorized Access");
+      return;
+    }
+
+    const workspace = await workspacesModel.findOne({ userId: user._id });
+
+    if (!workspace) {
+      logger.error("Workspace not found");
+      res.status(404).send("Workspace not found");
+      return;
+    }
+
+    await notesModel.deleteMany({
+      folderId,
+      userId: user._id,
+      workspaceId: workspace._id,
+    });
+
+    const deletedFolder = await foldersModel.findOneAndDelete({
+      _id: folderId,
+      userId: user._id,
+      workspaceId: workspace._id,
+    });
 
     if (!deletedFolder) {
       logger.error("Folder not found.");
