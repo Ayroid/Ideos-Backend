@@ -136,6 +136,102 @@ const getWorkspaceById = async (
   }
 };
 
+
+const getActiveWorkspace = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const userInfo = req.user;
+
+    if (!userInfo) {
+      logger.error("Unauthorized Access");
+      res.status(401).send("Unauthorized Access");
+      return;
+    }
+
+    const user = await usersModel
+      .findOne({ authId: userInfo.id })
+      .populate('activeWorkspace');
+
+    if (!user) {
+      logger.error("User not found");
+      res.status(404).send("User not found");
+      return;
+    }
+
+    if (!user.activeWorkspace) {
+      const workspaces = await workspacesModel
+        .find({
+          $or: [{ userId: user._id }, { members: user._id }]
+        })
+        .limit(1);
+
+      if (workspaces.length > 0) {
+        user.activeWorkspace = workspaces[0]._id as mongoose.Types.ObjectId;
+        await user.save();
+        logger.info("Default workspace set successfully");
+        res.status(200).json(workspaces[0]);
+        return;
+      }
+
+      logger.info("No active workspace found");
+      res.status(404).send("No active workspace found");
+      return;
+    }
+
+    logger.info("Active workspace fetched successfully");
+    res.status(200).json(user.activeWorkspace);
+  } catch (err) {
+    logger.error("Error fetching active workspace:", err);
+    res.status(500).send("Failed to fetch active workspace. Please try again later.");
+  }
+};
+
+const setActiveWorkspace = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const { workspaceId } = req.params;
+    const userInfo = req.user;
+
+    if (!userInfo) {
+      logger.error("Unauthorized Access");
+      res.status(401).send("Unauthorized Access");
+      return;
+    }
+
+    const user = await usersModel.findOne({ authId: userInfo.id });
+
+    if (!user) {
+      logger.error("User not found");
+      res.status(404).send("User not found");
+      return;
+    }
+
+    const workspace = await workspacesModel.findOne({
+      _id: workspaceId,
+      $or: [{ userId: user._id }, { members: user._id }]
+    });
+
+    if (!workspace) {
+      logger.error("Workspace not found or unauthorized");
+      res.status(404).send("Workspace not found or unauthorized");
+      return;
+    }
+
+    user.activeWorkspace = workspace._id as mongoose.Types.ObjectId;
+    await user.save();
+
+    logger.info("Active workspace set successfully");
+    res.status(200).json(workspace);
+  } catch (err) {
+    logger.error("Error setting active workspace:", err);
+    res.status(500).send("Failed to set active workspace. Please try again later.");
+  }
+};
+
 const updateWorkspace = async (
   req: AuthenticatedRequest,
   res: Response
@@ -302,6 +398,8 @@ export {
   createWorkspace,
   getWorkspaces,
   getWorkspaceById,
+  getActiveWorkspace,
+  setActiveWorkspace,
   updateWorkspace,
   deleteWorkspace,
   addWorkspaceMember,
