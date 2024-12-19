@@ -42,7 +42,7 @@ const createWorkspace = async (
     const workspace = new workspacesModel({
       name,
       userId: user._id,
-      members: [user._id],
+      members: [],
     });
 
     const savedWorkspace = await workspace.save();
@@ -82,17 +82,22 @@ const getWorkspaces = async (
       return;
     }
 
-    const workspaces = await workspacesModel
+    const personalWorkspaces = await workspacesModel
+      .find({ userId: user._id })
+      .populate("members", "name email");
+
+    const sharedWorkspaces = await workspacesModel
       .find({
-        $or: [
-          { userId: user._id },
-          { members: user._id }
-        ]
+        userId: { $ne: user._id },
+        members: user._id
       })
-      .populate('members', 'name email');
+      .populate("members", "name email");
 
     logger.info("Workspaces fetched successfully");
-    res.status(200).json(workspaces);
+    res.status(200).json({
+      personal: personalWorkspaces,
+      shared: sharedWorkspaces
+    });
   } catch (err) {
     logger.error("Error fetching workspaces:", err);
     res.status(500).send("Failed to fetch workspaces. Please try again later.");
@@ -115,7 +120,7 @@ const getWorkspaceById = async (
 
     const workspace = await workspacesModel
       .findById(id)
-      .populate('members', 'name email');
+      .populate("members", "name email");
 
     if (!workspace) {
       logger.error("Workspace not found");
@@ -200,7 +205,7 @@ const deleteWorkspace = async (
 
     const workspace = await workspacesModel.findOneAndDelete({
       _id: id,
-      userId: user._id
+      userId: user._id,
     });
 
     if (!workspace) {
@@ -281,7 +286,7 @@ const removeWorkspaceMember = async (
     }
 
     workspace.members = workspace.members.filter(
-      member => member.toString() !== memberId
+      (member) => member.toString() !== memberId
     );
     await workspace.save();
 
