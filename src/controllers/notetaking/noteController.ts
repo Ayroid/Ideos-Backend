@@ -2,7 +2,6 @@ import { Response } from "express";
 import {
   notesModel,
   foldersModel,
-  notebooksModel,
   usersModel,
   workspacesModel,
 } from "../../models";
@@ -14,7 +13,7 @@ const createNote = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { title, content, folderId, notebookId } = req.body;
+    const { title, content, folderId } = req.body;
     const userInfo = req.user;
 
     if (!userInfo) {
@@ -39,29 +38,24 @@ const createNote = async (
       return;
     }
 
-    if (!notebookId) {
-      logger.error("Notebook ID is required");
-      res.status(400).send("Notebook ID is required");
-      return;
-    }
+    if (folderId) {
+      const folder = await foldersModel.findOne({
+        _id: folderId,
+        userId: user._id,
+        workspaceId: workspace._id,
+      });
 
-    const notebook = await notebooksModel.findOne({
-      _id: notebookId,
-      userId: user._id,
-      workspaceId: workspace._id,
-    });
-
-    if (!notebook) {
-      logger.error("Notebook not found");
-      res.status(404).send("Notebook not found");
-      return;
+      if (!folder) {
+        logger.error("Folder not found");
+        res.status(404).send("Folder not found");
+        return;
+      }
     }
 
     const newNote = new notesModel({
       title,
       content,
       folderId,
-      notebookId,
       userId: user._id,
       workspaceId: workspace._id,
     });
@@ -76,12 +70,11 @@ const createNote = async (
   }
 };
 
-const getNotesByNotebook = async (
+const getUserNotes = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
   try {
-    const { notebookId } = req.params;
     const userInfo = req.user;
 
     if (!userInfo) {
@@ -106,20 +99,7 @@ const getNotesByNotebook = async (
       return;
     }
 
-    const notebook = await notebooksModel.findOne({
-      _id: notebookId,
-      userId: user._id,
-      workspaceId: workspace._id,
-    });
-
-    if (!notebook) {
-      logger.error("Notebook not found.");
-      res.status(404).send("Notebook not found.");
-      return;
-    }
-
     const notes = await notesModel.find({
-      notebookId,
       userId: user._id,
       workspaceId: workspace._id,
     });
@@ -316,18 +296,6 @@ const moveNote = async (
       return;
     }
 
-    const note = await notesModel.findOne({
-      _id: noteId,
-      userId: user._id,
-      workspaceId: workspace._id,
-    });
-
-    if (!note) {
-      logger.error("Note not found.");
-      res.status(404).send("Note not found.");
-      return;
-    }
-
     if (folderId) {
       const folder = await foldersModel.findOne({
         _id: folderId,
@@ -338,14 +306,6 @@ const moveNote = async (
       if (!folder) {
         logger.error("Folder not found.");
         res.status(404).send("Folder not found.");
-        return;
-      }
-
-      if (folder.notebookId.toString() !== note.notebookId.toString()) {
-        logger.error("Cannot move note to folder in different notebook.");
-        res
-          .status(400)
-          .send("Cannot move note to folder in different notebook.");
         return;
       }
     }
@@ -360,6 +320,12 @@ const moveNote = async (
       { new: true }
     );
 
+    if (!updatedNote) {
+      logger.error("Note not found.");
+      res.status(404).send("Note not found.");
+      return;
+    }
+
     logger.info("Note moved successfully.");
     res.status(200).json(updatedNote);
   } catch (err) {
@@ -371,7 +337,7 @@ const moveNote = async (
 export {
   createNote,
   getNoteById,
-  getNotesByNotebook,
+  getUserNotes,
   updateNote,
   deleteNote,
   moveNote,

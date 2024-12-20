@@ -14,7 +14,6 @@ import {
   pomodoroSettingsModel,
 } from "./pomodoro/pomodoroSettingsModel";
 
-import { notebooksModel } from "./notetaking/notebookModel";
 import { foldersModel } from "./notetaking/folderModel";
 import { notesModel } from "./notetaking/noteModel";
 
@@ -33,7 +32,6 @@ export {
   pomodoroTemplatesModel,
   IPomodoroSessionSettings,
   pomodoroSettingsModel,
-  notebooksModel,
   foldersModel,
   notesModel,
   IWorkspace,

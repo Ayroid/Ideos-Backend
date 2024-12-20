@@ -1,17 +1,9 @@
 import { Router } from "express";
 import {
-  getNotebookById,
-  getUserNotebooks,
-  createNotebook,
-  updateNotebook,
-  deleteNotebook,
-} from "../../controllers/notetaking/notebookController";
-
-import {
   createNote,
   deleteNote,
   getNoteById,
-  getNotesByNotebook,
+  getUserNotes,
   moveNote,
   updateNote,
 } from "../../controllers/notetaking/noteController";
@@ -21,47 +13,25 @@ import {
   getFolderById,
   updateFolder,
   deleteFolder,
-  getFoldersByNotebook,
+  getUserFolders,
 } from "../../controllers/notetaking/folderController";
 
 const notetakingRouter = Router();
 
-// Notebook routes
-//  ✅
-notetakingRouter.route("/notebooks").get(getUserNotebooks).post(createNotebook);
+notetakingRouter.route("/notes").get(getUserNotes).post(createNote);
 
 notetakingRouter
-  .route("/notebooks/:notebookId")
-  .get(getNotebookById)
-  .put(updateNotebook)
-  .delete(deleteNotebook);
-
-// Note routes within notebooks
-//  ✅
-notetakingRouter
-  .route("/notebooks/:notebookId/notes")
-  .get(getNotesByNotebook)
-  .post(createNote);
-
-notetakingRouter
-  .route("/notebooks/:notebookId/notes/:noteId")
+  .route("/notes/:noteId")
   .get(getNoteById)
   .put(updateNote)
   .delete(deleteNote);
 
-// Special note operation
-notetakingRouter
-  .route("/notebooks/:notebookId/notes/:noteId/move")
-  .put(moveNote);
+notetakingRouter.route("/notes/:noteId/move").put(moveNote);
 
-// Folder routes within notebooks
-notetakingRouter
-  .route("/notebooks/:notebookId/folders")
-  .get(getFoldersByNotebook)
-  .post(createFolder);
+notetakingRouter.route("/folders").get(getUserFolders).post(createFolder);
 
 notetakingRouter
-  .route("/notebooks/:notebookId/folders/:folderId")
+  .route("/folders/:folderId")
   .get(getFolderById)
   .put(updateFolder)
   .delete(deleteFolder);

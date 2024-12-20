@@ -2,7 +2,6 @@ import { Response } from "express";
 import {
   foldersModel,
   notesModel,
-  notebooksModel,
   usersModel,
   workspacesModel,
 } from "../../models";
@@ -14,18 +13,12 @@ const createFolder = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { name, notebookId } = req.body;
+    const { name } = req.body;
     const userInfo = req.user;
 
     if (!userInfo) {
       logger.error("Unauthorized Access");
       res.status(400).send("Unauthorized Access");
-      return;
-    }
-
-    if (!notebookId) {
-      logger.error("Notebook ID is required");
-      res.status(400).send("Notebook ID is required");
       return;
     }
 
@@ -45,21 +38,8 @@ const createFolder = async (
       return;
     }
 
-    const notebook = await notebooksModel.findOne({
-      _id: notebookId,
-      userId: user._id,
-      workspaceId: workspace._id,
-    });
-
-    if (!notebook) {
-      logger.error("Notebook not found");
-      res.status(404).send("Notebook not found");
-      return;
-    }
-
     const newFolder = new foldersModel({
       name,
-      notebookId,
       userId: user._id,
       workspaceId: workspace._id,
     });
@@ -132,12 +112,11 @@ const getFolderById = async (
   }
 };
 
-const getFoldersByNotebook = async (
+const getUserFolders = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
   try {
-    const { notebookId } = req.params;
     const userInfo = req.user;
 
     if (!userInfo) {
@@ -162,26 +141,13 @@ const getFoldersByNotebook = async (
       return;
     }
 
-    const notebook = await notebooksModel.findOne({
-      _id: notebookId,
-      userId: user._id,
-      workspaceId: workspace._id,
-    });
-
-    if (!notebook) {
-      logger.error("Notebook not found.");
-      res.status(404).send("Notebook not found.");
-      return;
-    }
-
     const folders = await foldersModel.find({
-      notebookId,
       userId: user._id,
       workspaceId: workspace._id,
     });
 
     if (!folders.length) {
-      logger.info("No folders found in this notebook.");
+      logger.info("No folders found for this user.");
       res.status(200).json([]);
       return;
     }
@@ -307,7 +273,7 @@ const deleteFolder = async (
 export {
   createFolder,
   getFolderById,
-  getFoldersByNotebook,
+  getUserFolders,
   updateFolder,
   deleteFolder,
 };
