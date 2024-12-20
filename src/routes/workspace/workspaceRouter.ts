@@ -13,6 +13,9 @@ import {
 
 const workspaceRouter: Router = Router();
 
+workspaceRouter.get("/active", getActiveWorkspace);
+workspaceRouter.put("/active/:workspaceId", setActiveWorkspace);
+
 workspaceRouter.route("/").get(getWorkspaces).post(createWorkspace);
 
 workspaceRouter
@@ -25,8 +28,5 @@ workspaceRouter
   .route("/:id/members")
   .post(addWorkspaceMember)
   .delete(removeWorkspaceMember);
-
-workspaceRouter.get("/active", getActiveWorkspace);
-workspaceRouter.put("/active/:workspaceId", setActiveWorkspace);
 
 export { workspaceRouter };
