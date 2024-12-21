@@ -1,4 +1,5 @@
 import { IUser, usersModel } from "./user/usersModel";
+import { IKanbanBoard, kanbanBoardModel } from "./kanban/kanbanModel";
 import { ITodo, todosModel } from "./kanban/todosModel";
 import { ITodoColumn, todoColumnModel } from "./kanban/todosColumnModel";
 import {
@@ -22,6 +23,8 @@ import { IWorkspace, workspacesModel } from "./workspace/workspaceModel";
 export {
   IUser,
   usersModel,
+  IKanbanBoard,
+  kanbanBoardModel,
   ITodo,
   todosModel,
   ITodoColumn,

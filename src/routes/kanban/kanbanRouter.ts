@@ -1,5 +1,12 @@
 import { Router } from "express";
 import {
+  getBoards,
+  createBoard,
+  updateBoard,
+  deleteBoard,
+  setDefaultBoard,
+} from "../../controllers/kanban/kanbanController";
+import {
   getTodoColumns,
   createTodoColumns,
   updateTodosColumn,
@@ -15,17 +22,26 @@ import {
 
 const kanbanRouter: Router = Router();
 
-kanbanRouter.route("/columns").get(getTodoColumns).post(createTodoColumns);
+kanbanRouter.route("/boards").get(getBoards).post(createBoard);
+
+kanbanRouter.route("/boards/:id").put(updateBoard).delete(deleteBoard);
+
+kanbanRouter.route("/boards/:id/default").put(setDefaultBoard);
 
 kanbanRouter
-  .route("/columns/:id")
+  .route("/boards/:boardId/columns")
+  .get(getTodoColumns)
+  .post(createTodoColumns);
+
+kanbanRouter
+  .route("/boards/:boardId/columns/:id")
   .put(updateTodosColumn)
   .delete(deleteTodosColumn);
 
-kanbanRouter.route("/todos").get(getTodos).post(createTodo);
+kanbanRouter.route("/boards/:boardId/todos").get(getTodos).post(createTodo);
 
 kanbanRouter
-  .route("/todos/:id")
+  .route("/boards/:boardId/todos/:id")
   .get(getTodoById)
   .put(updateTodo)
   .delete(deleteTodo);

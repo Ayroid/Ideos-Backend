@@ -1,0 +1,299 @@
+import dotenv from "dotenv";
+import { Response } from "express";
+import { AuthenticatedRequest } from "../../../types";
+import logger from "../../logger";
+import { kanbanBoardModel, usersModel, workspacesModel } from "../../models";
+
+dotenv.config();
+
+const getBoards = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const userInfo = req.user;
+
+    if (!userInfo) {
+      logger.error("Unauthorized Access");
+      res.status(400).send("Unauthorized Access");
+      return;
+    }
+
+    const user = await usersModel.findOne({ authId: userInfo.id });
+
+    if (!user) {
+      logger.error("Unauthorized Access");
+      res.status(409).send("Unauthorized Access");
+      return;
+    }
+
+    const workspace = await workspacesModel.findOne({ userId: user._id });
+
+    if (!workspace) {
+      logger.error("Workspace not found");
+      res.status(404).send("Workspace not found");
+      return;
+    }
+
+    const boards = await kanbanBoardModel.find({
+      userId: user._id,
+      workspaceId: workspace._id
+    });
+
+    logger.info("Kanban boards fetched successfully");
+    res.status(200).send(boards);
+  } catch (err) {
+    logger.error("Error getting boards:", err);
+    res.status(500).send("Failed to get boards. Please try again later.");
+  }
+};
+
+const createBoard = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const { title, description } = req.body;
+    const userInfo = req.user;
+
+    if (!userInfo) {
+      logger.error("Unauthorized Access");
+      res.status(400).send("Unauthorized Access");
+      return;
+    }
+
+    const user = await usersModel.findOne({ authId: userInfo.id });
+
+    if (!user) {
+      logger.error("Unauthorized Access");
+      res.status(409).send("Unauthorized Access");
+      return;
+    }
+
+    const workspace = await workspacesModel.findOne({ userId: user._id });
+
+    if (!workspace) {
+      logger.error("Workspace not found");
+      res.status(404).send("Workspace not found");
+      return;
+    }
+
+    // Check if user has reached the board limit
+    const boardCount = await kanbanBoardModel.countDocuments({
+      userId: user._id,
+      workspaceId: workspace._id
+    });
+
+    if (boardCount >= 5) {
+      logger.error("Board limit reached");
+      res.status(400).send("You have reached the maximum limit of 5 boards");
+      return;
+    }
+
+    // Set as default if this is the first board
+    const isDefault = boardCount === 0;
+
+    const board = new kanbanBoardModel({
+      userId: user._id,
+      workspaceId: workspace._id,
+      title,
+      description,
+      isDefault
+    });
+
+    const created = await board.save();
+
+    if (!created) {
+      logger.error("Failed to create board");
+      res.status(500).send("Failed to create board");
+      return;
+    }
+
+    logger.info("Board created successfully");
+    res.status(201).send(created);
+  } catch (err) {
+    logger.error("Error creating board:", err);
+    res.status(500).send("Failed to create board. Please try again later.");
+  }
+};
+
+const updateBoard = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { title, description } = req.body;
+    const userInfo = req.user;
+
+    if (!userInfo) {
+      logger.error("Unauthorized Access");
+      res.status(400).send("Unauthorized Access");
+      return;
+    }
+
+    const user = await usersModel.findOne({ authId: userInfo.id });
+
+    if (!user) {
+      logger.error("Unauthorized Access");
+      res.status(409).send("Unauthorized Access");
+      return;
+    }
+
+    const workspace = await workspacesModel.findOne({ userId: user._id });
+
+    if (!workspace) {
+      logger.error("Workspace not found");
+      res.status(404).send("Workspace not found");
+      return;
+    }
+
+    const updated = await kanbanBoardModel.findOneAndUpdate(
+      { _id: id, userId: user._id, workspaceId: workspace._id },
+      { title, description },
+      { new: true }
+    );
+
+    if (!updated) {
+      logger.error("Board not found");
+      res.status(404).send("Board not found");
+      return;
+    }
+
+    logger.info("Board updated successfully");
+    res.status(200).send(updated);
+  } catch (err) {
+    logger.error("Error updating board:", err);
+    res.status(500).send("Failed to update board. Please try again later.");
+  }
+};
+
+const deleteBoard = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const userInfo = req.user;
+
+    if (!userInfo) {
+      logger.error("Unauthorized Access");
+      res.status(400).send("Unauthorized Access");
+      return;
+    }
+
+    const user = await usersModel.findOne({ authId: userInfo.id });
+
+    if (!user) {
+      logger.error("Unauthorized Access");
+      res.status(409).send("Unauthorized Access");
+      return;
+    }
+
+    const workspace = await workspacesModel.findOne({ userId: user._id });
+
+    if (!workspace) {
+      logger.error("Workspace not found");
+      res.status(404).send("Workspace not found");
+      return;
+    }
+
+    // Don't allow deletion of default board if it's the only board
+    const board = await kanbanBoardModel.findOne({
+      _id: id,
+      userId: user._id,
+      workspaceId: workspace._id
+    });
+
+    if (!board) {
+      logger.error("Board not found");
+      res.status(404).send("Board not found");
+      return;
+    }
+
+    const boardCount = await kanbanBoardModel.countDocuments({
+      userId: user._id,
+      workspaceId: workspace._id
+    });
+
+    if (boardCount === 1 && board.isDefault) {
+      logger.error("Cannot delete the only board");
+      res.status(400).send("Cannot delete the only board");
+      return;
+    }
+
+    // Delete the board and all associated columns and todos
+    await kanbanBoardModel.findByIdAndDelete(id);
+
+    logger.info("Board deleted successfully");
+    res.status(200).send("Board deleted successfully");
+  } catch (err) {
+    logger.error("Error deleting board:", err);
+    res.status(500).send("Failed to delete board. Please try again later.");
+  }
+};
+
+const setDefaultBoard = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const userInfo = req.user;
+
+    if (!userInfo) {
+      logger.error("Unauthorized Access");
+      res.status(400).send("Unauthorized Access");
+      return;
+    }
+
+    const user = await usersModel.findOne({ authId: userInfo.id });
+
+    if (!user) {
+      logger.error("Unauthorized Access");
+      res.status(409).send("Unauthorized Access");
+      return;
+    }
+
+    const workspace = await workspacesModel.findOne({ userId: user._id });
+
+    if (!workspace) {
+      logger.error("Workspace not found");
+      res.status(404).send("Workspace not found");
+      return;
+    }
+
+    // Remove default status from all boards
+    await kanbanBoardModel.updateMany(
+      { userId: user._id, workspaceId: workspace._id },
+      { isDefault: false }
+    );
+
+    // Set the new default board
+    const updated = await kanbanBoardModel.findOneAndUpdate(
+      { _id: id, userId: user._id, workspaceId: workspace._id },
+      { isDefault: true },
+      { new: true }
+    );
+
+    if (!updated) {
+      logger.error("Board not found");
+      res.status(404).send("Board not found");
+      return;
+    }
+
+    logger.info("Default board updated successfully");
+    res.status(200).send(updated);
+  } catch (err) {
+    logger.error("Error setting default board:", err);
+    res.status(500).send("Failed to set default board. Please try again later.");
+  }
+};
+
+export {
+  getBoards,
+  createBoard,
+  updateBoard,
+  deleteBoard,
+  setDefaultBoard
+};
