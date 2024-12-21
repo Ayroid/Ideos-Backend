@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   getBoards,
+  getBoardWithDetails,
   createBoard,
   updateBoard,
   deleteBoard,
@@ -24,7 +25,11 @@ const kanbanRouter: Router = Router();
 
 kanbanRouter.route("/boards").get(getBoards).post(createBoard);
 
-kanbanRouter.route("/boards/:id").put(updateBoard).delete(deleteBoard);
+kanbanRouter
+  .route("/boards/:id")
+  .get(getBoardWithDetails)
+  .put(updateBoard)
+  .delete(deleteBoard);
 
 kanbanRouter.route("/boards/:id/default").put(setDefaultBoard);
 

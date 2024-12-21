@@ -2,7 +2,13 @@ import dotenv from "dotenv";
 import { Response } from "express";
 import { AuthenticatedRequest } from "../../../types";
 import logger from "../../logger";
-import { kanbanBoardModel, usersModel, workspacesModel } from "../../models";
+import {
+  kanbanBoardModel,
+  todoColumnModel,
+  todosModel,
+  usersModel,
+  workspacesModel,
+} from "../../models";
 
 dotenv.config();
 
@@ -37,7 +43,7 @@ const getBoards = async (
 
     const boards = await kanbanBoardModel.find({
       userId: user._id,
-      workspaceId: workspace._id
+      workspaceId: workspace._id,
     });
 
     logger.info("Kanban boards fetched successfully");
@@ -45,6 +51,77 @@ const getBoards = async (
   } catch (err) {
     logger.error("Error getting boards:", err);
     res.status(500).send("Failed to get boards. Please try again later.");
+  }
+};
+
+const getBoardWithDetails = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const userInfo = req.user;
+
+    if (!userInfo) {
+      logger.error("Unauthorized Access");
+      res.status(401).send("Unauthorized Access");
+      return;
+    }
+
+    const user = await usersModel.findOne({ authId: userInfo.id });
+
+    if (!user) {
+      logger.error("User not found");
+      res.status(404).send("User not found");
+      return;
+    }
+
+    // Get the board
+    const board = await kanbanBoardModel.findOne({
+      _id: id,
+      userId: user._id,
+    });
+
+    if (!board) {
+      logger.error("Board not found or unauthorized");
+      res.status(404).send("Board not found or unauthorized");
+      return;
+    }
+
+    // Get columns for the board with their todos
+    const columns = await todoColumnModel
+      .find({
+        boardId: id,
+      })
+      .lean();
+
+    // Get all todos for the board
+    const todos = await todosModel
+      .find({
+        boardId: id,
+      })
+      .lean();
+
+    // Map todos to their respective columns
+    const columnsWithTodos = columns.map((column) => ({
+      ...column,
+      todoIds: todos.filter((todo) => todo.columnId === column.uniqueId),
+    }));
+
+    // Prepare the response
+    const response = {
+      ...board.toObject(),
+      columns: columnsWithTodos,
+      todos: todos,
+    };
+
+    logger.info(`Board ${id} fetched successfully with columns and todos`);
+    res.status(200).json(response);
+  } catch (err) {
+    logger.error("Error fetching board details:", err);
+    res.status(500).json({
+      error: "Failed to fetch board details. Please try again later.",
+    });
   }
 };
 
@@ -81,7 +158,7 @@ const createBoard = async (
     // Check if user has reached the board limit
     const boardCount = await kanbanBoardModel.countDocuments({
       userId: user._id,
-      workspaceId: workspace._id
+      workspaceId: workspace._id,
     });
 
     if (boardCount >= 5) {
@@ -98,7 +175,7 @@ const createBoard = async (
       workspaceId: workspace._id,
       title,
       description,
-      isDefault
+      isDefault,
     });
 
     const created = await board.save();
@@ -178,42 +255,31 @@ const deleteBoard = async (
 
     if (!userInfo) {
       logger.error("Unauthorized Access");
-      res.status(400).send("Unauthorized Access");
+      res.status(401).send("Unauthorized Access");
       return;
     }
 
     const user = await usersModel.findOne({ authId: userInfo.id });
 
     if (!user) {
-      logger.error("Unauthorized Access");
-      res.status(409).send("Unauthorized Access");
+      logger.error("User not found");
+      res.status(404).send("User not found");
       return;
     }
 
-    const workspace = await workspacesModel.findOne({ userId: user._id });
-
-    if (!workspace) {
-      logger.error("Workspace not found");
-      res.status(404).send("Workspace not found");
-      return;
-    }
-
-    // Don't allow deletion of default board if it's the only board
     const board = await kanbanBoardModel.findOne({
       _id: id,
       userId: user._id,
-      workspaceId: workspace._id
     });
 
     if (!board) {
-      logger.error("Board not found");
-      res.status(404).send("Board not found");
+      logger.error("Board not found or unauthorized");
+      res.status(404).send("Board not found or unauthorized");
       return;
     }
 
     const boardCount = await kanbanBoardModel.countDocuments({
       userId: user._id,
-      workspaceId: workspace._id
     });
 
     if (boardCount === 1 && board.isDefault) {
@@ -222,14 +288,30 @@ const deleteBoard = async (
       return;
     }
 
-    // Delete the board and all associated columns and todos
-    await kanbanBoardModel.findByIdAndDelete(id);
+    if (board.isDefault && boardCount > 1) {
+      const anotherBoard = await kanbanBoardModel.findOne({
+        userId: user._id,
+        _id: { $ne: id },
+      });
+      if (anotherBoard) {
+        anotherBoard.isDefault = true;
+        await anotherBoard.save();
+      }
+    }
 
-    logger.info("Board deleted successfully");
-    res.status(200).send("Board deleted successfully");
+    await Promise.all([
+      kanbanBoardModel.findByIdAndDelete(id),
+      todoColumnModel.deleteMany({ boardId: id }),
+      todosModel.deleteMany({ boardId: id }),
+    ]);
+
+    logger.info(`Board ${id} deleted successfully`);
+    res.status(200).json({ message: "Board deleted successfully" });
   } catch (err) {
     logger.error("Error deleting board:", err);
-    res.status(500).send("Failed to delete board. Please try again later.");
+    res.status(500).json({
+      error: "Failed to delete board. Please try again later.",
+    });
   }
 };
 
@@ -286,14 +368,17 @@ const setDefaultBoard = async (
     res.status(200).send(updated);
   } catch (err) {
     logger.error("Error setting default board:", err);
-    res.status(500).send("Failed to set default board. Please try again later.");
+    res
+      .status(500)
+      .send("Failed to set default board. Please try again later.");
   }
 };
 
 export {
   getBoards,
+  getBoardWithDetails,
   createBoard,
   updateBoard,
   deleteBoard,
-  setDefaultBoard
+  setDefaultBoard,
 };
